@@ -193,7 +193,12 @@ class CachedClient:
             if resp.status_code not in self.RETRY_STATUSES:
                 break
             retry_after = resp.headers.get("Retry-After")
-            delay = float(retry_after) if retry_after and retry_after.isdigit() else 2**attempt
+            if retry_after and retry_after.isdigit():
+                delay = float(retry_after)
+            elif resp.status_code == 429:
+                delay = 10.0 * (attempt + 1)  # back off hard: retries also burn the hourly budget
+            else:
+                delay = 2.0**attempt
             log.warning("%s -> %s, retrying in %.0f s", url, resp.status_code, delay)
             self._sleep(min(delay, 900))
         raise ApiError(f"{url} params={dict(params or {})}: {last_error}")
