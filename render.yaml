@@ -1,0 +1,9 @@
+# Render Blueprint: one Docker web service (API + front). Redeploys on every push to main.
+services:
+  - type: web
+    name: f1-podium-predictor
+    runtime: docker
+    plan: free
+    branch: main
+    autoDeploy: true
+    healthCheckPath: /api/health
