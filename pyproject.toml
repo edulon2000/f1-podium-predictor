@@ -14,6 +14,10 @@ dependencies = [
 ]
 
 [project.optional-dependencies]
+api = [
+    "fastapi>=0.115",
+    "uvicorn[standard]>=0.30",
+]
 explore = [
     "fastf1>=3.4",
     "matplotlib>=3.9",
@@ -26,6 +30,7 @@ f1pred-ingest = "f1pred.ingest:main"
 f1pred-ingest-openf1 = "f1pred.openf1:main"
 f1pred-predict = "f1pred.predict:main"
 f1pred-score = "f1pred.predict:score_main"
+f1pred-export = "f1pred.export:main"
 
 [dependency-groups]
 dev = [
@@ -54,3 +59,4 @@ select = ["E", "F", "I", "B", "UP", "SIM"]
 [tool.ruff.lint.per-file-ignores]
 # Notebook cell sources are long string literals.
 "scripts/make_sanity_notebook.py" = ["E501"]
+"scripts/make_model_notebook.py" = ["E501"]
