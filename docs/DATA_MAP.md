@@ -115,6 +115,35 @@ same tags as `driver_standings`.
 | `constructors` | constructor_id, name, nationality | KEY / PRE-QUALI | Latest name and nationality |
 | `circuits` | circuit_id, circuit_name, locality, country, lat, long | KEY / PRE-QUALI | |
 
+## What was collected (run of 2026-11-08, 590 API requests)
+
+| Table | Rows | Coverage |
+|---|---|---|
+| races | 275 | 2014–2026, including the 3 remaining 2026 rounds (Las Vegas R21, Qatar R22, Abu Dhabi R23) |
+| results | 5,545 | 270 races. Every completed round from 2014 to 2026 R20 (Brazil) |
+| qualifying | 5,524 | Same 270 races |
+| sprint_results | 612 | 30 sprints: 3 each in 2021–22, 6 each in 2023–26. Matches every `is_sprint_weekend` |
+| driver_standings | 5,820 | After each of the 270 rounds |
+| constructor_standings | 2,779 | After each of the 270 rounds |
+| drivers / constructors / circuits | 65 / 22 / 33 | |
+
+**Consistency checks passed**
+- No duplicate `(season, round, driver_id)` keys in any table.
+- For every driver and season, the sum of race and sprint points equals the final standings
+  points (0 mismatches). That covers the 2014 Abu Dhabi double points.
+
 ## Gaps found
 
-_Filled in from `ingest_report.json` once the full run finishes._
+| # | Gap | Where | Impact / handling |
+|---|---|---|---|
+| 1 | **`grid` is null for all 22 drivers** | 2026 R20 Brazil (raced the same day) | Jolpica publishes the grid late. The next run refreshes the current season after a 6 h TTL. For live predictions, take the grid from OpenF1 `starting_grid` (quali `session_key`) |
+| 2 | No `FastestLap` data | 2026 R20 (not published yet); 2021 R12 Spa (real: no green-flag laps) | Post-race column anyway, so no feature impact |
+| 3 | **22 result rows have no qualifying row** | 17 races. Examples: 2014 R19 (Red Bulls excluded from quali), 2026 R1 (Verstappen, Sainz, Stroll set no time → started P20–22), 2026 R14 (Bearman, Stroll) | Qualifying is not a full entry list. Treat "no quali row" as "no time set" and use `grid` for starting position |
+| 4 | 1 qualifying row has no race result | 2025 R9, Stroll (withdrew after qualifying) | Exclude from training targets |
+| 5 | **Duplicate qualifying positions with inconsistent times** (7 cases) | 2023 R10, 2024 R8/R15/R17, 2025 R7, 2026 R19. E.g. 2024 R15: Albon is listed P10 with no Q1 time but a Q3 time | Upstream data errors, probably penalties and disqualifications applied unevenly. In Phase 2, derive quali pace from times rather than trusting `position` alone |
+| 6 | `status` vocabulary changes over time | "+1 Lap" (≤2025) vs "Lapped" (2026); 2026 also uses generic "Retired" | Needs a status → {finished, lapped, mechanical, accident, other} map before computing DNF rates |
+| 7 | Constructor IDs split across rebrands | `toro_rosso`→`alphatauri`→`rb`; `force_india`→`racing_point`→`aston_martin`; `renault`→`alpine`; `sauber`→`alfa`→`sauber`→`audi`; `lotus_f1`; `manor`/`marussia` | Team-history features need a lineage map. New entrants in 2026: `audi`, `cadillac` (no history) |
+| 8 | Naming quirk | 2026 R16 "Bahrain Grand Prix in Malaysia", `circuit_id = sepang` (a relocated race) | Kept as returned. Circuit-history features use `circuit_id`, so it counts as Sepang (last raced in 2017) |
+| 9 | Race dates are UTC | Las Vegas `race_date = 2026-11-22`, which is the local Saturday night of Nov 21 | Use `race_start_utc` for ordering, and local time only for display |
+| 10 | No 2014–2022 practice, tyre or weather data | Not in Jolpica. FastF1 now needs an F1 account (see SOURCES.md) | Practice-pace features only exist from 2023 (OpenF1) |
+| 11 | Field size varies (18–22 cars) | 2014–15 had fewer than 20 cars in some races; 2026 has 22 (Cadillac) | Normalise position-based features by field size |
