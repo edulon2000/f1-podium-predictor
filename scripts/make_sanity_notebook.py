@@ -83,8 +83,11 @@ cells = [
         "w26"
     ),
     nbf.v4.new_code_cell(
-        "pd.concat({'wins_by_driver': w26['winner'].value_counts(),\n"
-        "           'wins_by_team': w26['team'].value_counts()}, axis=1).fillna(0).astype(int)"
+        "w26.groupby(['winner', 'team']).size().rename('wins').sort_values(ascending=False)"
+        ".reset_index()"
+    ),
+    nbf.v4.new_code_cell(
+        "w26['team'].value_counts().rename('wins').reset_index()"
     ),
     nbf.v4.new_markdown_cell("## Gaps reported by the ingestion"),
     nbf.v4.new_code_cell(
