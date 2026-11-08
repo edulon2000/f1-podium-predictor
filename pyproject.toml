@@ -20,6 +20,7 @@ explore = [
 
 [project.scripts]
 f1pred-ingest = "f1pred.ingest:main"
+f1pred-ingest-openf1 = "f1pred.openf1:main"
 
 [dependency-groups]
 dev = [

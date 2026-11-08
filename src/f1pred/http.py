@@ -37,6 +37,7 @@ class RateLimiter:
         per_second: int = 4,
         per_hour: int = 500,
         state_path: Path | None = None,
+        per_minute: int | None = None,
         clock: Callable[[], float] = time.time,
         sleep: Callable[[float], None] = time.sleep,
     ) -> None:
@@ -45,7 +46,9 @@ class RateLimiter:
         self.state_path = state_path
         self._clock = clock
         self._sleep = sleep
+        self.per_minute = per_minute
         self._second: deque[float] = deque()
+        self._minute: deque[float] = deque()
         self._hour: deque[float] = deque(self._load_state())
 
     def _load_state(self) -> list[float]:
@@ -80,14 +83,17 @@ class RateLimiter:
             wait = max(
                 self._wait_needed(self._second, self.per_second, 1.0, now),
                 self._wait_needed(self._hour, self.per_hour, 3600.0, now),
+                self._wait_needed(self._minute, self.per_minute, 60.0, now)
+                if self.per_minute else 0.0,
             )
             if wait <= 0:
                 break
             if wait > 5:
-                log.warning("Rate limit reached: waiting %.0f s for the hourly window", wait)
+                log.warning("Rate limit reached: waiting %.0f s", wait)
             self._sleep(wait)
         now = self._clock()
         self._second.append(now)
+        self._minute.append(now)
         self._hour.append(now)
         self._save_state()
 
@@ -147,6 +153,7 @@ class CachedClient:
         limiter: RateLimiter,
         http: httpx.Client | None = None,
         max_retries: int = 4,
+        not_found_value: Any = None,
         clock: Callable[[], float] = time.time,
         sleep: Callable[[float], None] = time.sleep,
     ) -> None:
@@ -154,6 +161,8 @@ class CachedClient:
         self.limiter = limiter
         self.http = http or httpx.Client(timeout=30.0, headers={"User-Agent": "f1pred/0.1"})
         self.max_retries = max_retries
+        # When set, a 404 is a valid "no data" answer (OpenF1 uses 404 for empty results).
+        self.not_found_value = not_found_value
         self._clock = clock
         self._sleep = sleep
         self.network_requests = 0
@@ -189,6 +198,8 @@ class CachedClient:
                     return resp.json()
                 except ValueError as exc:
                     raise ApiError(f"{url}: response is not JSON ({resp.text[:120]!r})") from exc
+            if resp.status_code == 404 and self.not_found_value is not None:
+                return self.not_found_value
             last_error = f"HTTP {resp.status_code}: {resp.text[:200]!r}"
             if resp.status_code not in self.RETRY_STATUSES:
                 break

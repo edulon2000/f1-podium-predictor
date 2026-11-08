@@ -162,3 +162,21 @@ def test_cache_file_is_valid_json_with_metadata(tmp_path):
     payload = json.loads(files[0].read_text(encoding="utf-8"))
     assert payload["url"].endswith("2019/results.json")
     assert payload["body"] == {"ok": True}
+
+
+def test_limiter_per_minute_window():
+    clock = FakeClock()
+    lim = RateLimiter(per_second=1000, per_hour=1000, per_minute=2, clock=clock.time,
+                      sleep=clock.sleep)
+    for _ in range(3):
+        lim.acquire()
+    assert sum(clock.slept) == pytest.approx(60.0, abs=0.01)
+
+
+def test_client_not_found_value_treats_404_as_empty(tmp_path):
+    def handler(request):
+        return httpx.Response(404, json={"detail": "No results found."})
+
+    client, _ = make_client(tmp_path, handler)
+    client.not_found_value = []
+    assert client.get_json("https://api.example/f1/empty") == []
