@@ -1,7 +1,7 @@
 """OpenF1 (https://api.openf1.org/v1) ingestion: practice laps/stints, starting grid, weather.
 
 Historical data (2023+) is free without authentication. No rate limit is documented, so the
-client runs at 1 req/s and at most 40 req/min, and backs off on 429.
+client runs at 1 req/s and at most 25 req/min (429s observed at 40/min), and backs off on 429.
 
     uv run f1pred-ingest-openf1 --from 2023 --to 2026
 
@@ -197,7 +197,7 @@ def main(argv: list[str] | None = None) -> int:
     drivers = pd.read_parquet(proc / "drivers.parquet")
     client = CachedClient(
         cache=DiskCache(args.data_dir / "raw" / "openf1", base_url=BASE_URL),
-        limiter=RateLimiter(per_second=1, per_minute=40, per_hour=2000,
+        limiter=RateLimiter(per_second=1, per_minute=25, per_hour=2000,
                             state_path=Path(".cache") / "openf1_limiter.json"),
         max_retries=6,
         not_found_value=[],
