@@ -209,8 +209,11 @@ def main(argv: list[str] | None = None) -> int:
     current = today.year if args.first <= today.year <= args.last else None
     client = CachedClient(
         cache=DiskCache(args.data_dir / "raw" / "jolpica", base_url=BASE_URL),
-        limiter=RateLimiter(per_second=4, per_hour=500,
+        # Documented burst is 4 req/s, but 429s were observed at ~1.6 req/s (2026-11-08).
+        # The 500 req/h cap dominates total runtime anyway, so 1 req/s costs nothing.
+        limiter=RateLimiter(per_second=1, per_hour=500,
                             state_path=Path(".cache") / "jolpica_limiter.json"),
+        max_retries=6,
     )
     api = Jolpica(client)
     max_age = 0.0 if args.refresh_current else args.current_ttl_hours * 3600

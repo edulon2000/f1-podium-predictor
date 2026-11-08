@@ -25,8 +25,8 @@ caches every response on disk, and writes Parquet tables to `data/processed/`.
 uv run f1pred-ingest --from 2014 --to 2026
 ```
 
-- Respects Jolpica's limits (4 req/s, 500 req/h) — the hourly window is persisted, so restarts
-  don't reset it. A cold run takes ~1.5–2 h; re-runs are served from the cache in seconds.
+- Respects Jolpica's limits (500 req/h; runs at 1 req/s because 429s appear well below the
+  documented 4 req/s burst) — the hourly window is persisted, so restarts don't reset it. A cold run takes ~1.5–2 h; re-runs are served from the cache in seconds.
 - Finished seasons are cached forever; the current season is refreshed when stale or when the
   latest round is incomplete. Use `--refresh-current` to force it.
 - If the API errors or its schema changes, the run stops with an error — it never fills gaps.

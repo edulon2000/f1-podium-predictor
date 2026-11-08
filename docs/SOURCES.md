@@ -10,7 +10,7 @@ real calls; the raw probe output is in `data/raw/samples/source_probe.json`
 | Coverage | 1950 → today | **2023 → today** (2022 returns "No results found") | 2018 → today (documented) |
 | Granularity | One row per driver per session | Per lap / per stint / per sample | Per lap, per sample (telemetry) |
 | Auth | None | None for historical data | **Now needs an F1 account — see below** |
-| Limits | 4 req/s burst, 500 req/h | Not hit at ~2 req/s | — |
+| Limits | Documented 4 req/s burst, 500 req/h — **429s observed from ~1.6 req/s**, so the client runs at 1 req/s | Not hit at ~2 req/s | — |
 | Used in Phase 1 | ✅ Main source (ingested) | 🔍 Probed only | ❌ Blocked |
 
 ## Jolpica-F1 — `https://api.jolpi.ca/ergast/f1/`
