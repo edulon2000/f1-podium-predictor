@@ -64,7 +64,12 @@ def map_meetings(sessions: pd.DataFrame, races: pd.DataFrame) -> pd.DataFrame:
 
 def driver_map(of1_drivers: list[dict], season: int, results: pd.DataFrame,
                drivers: pd.DataFrame) -> dict[int, str]:
-    """driver_number -> driver_id for one meeting, via 3-letter code, then car number."""
+    """driver_number -> driver_id for one meeting.
+
+    The 3-letter code is authoritative. OpenF1's meeting-level driver list also contains
+    support-series drivers (F2/F3) who reuse F1 car numbers, so the car number is only used
+    when a row has no code at all, and never overrides a code-based match.
+    """
     roster = results[results["season"].isin([season, season - 1])]
     roster_ids = set(roster["driver_id"])
     code_to_id = {r.code: r.driver_id for r in drivers.itertuples()
@@ -72,11 +77,19 @@ def driver_map(of1_drivers: list[dict], season: int, results: pd.DataFrame,
     num_to_id = (roster[roster["season"] == season].dropna(subset=["number"])
                  .drop_duplicates("number", keep="last").set_index("number")["driver_id"].to_dict())
     out: dict[int, str] = {}
+    by_code: set[int] = set()
     for d in of1_drivers:
-        num = d.get("driver_number")
-        did = code_to_id.get(d.get("name_acronym")) or num_to_id.get(num)
-        if num is not None and did:
-            out[int(num)] = did
+        num, code = d.get("driver_number"), d.get("name_acronym")
+        if num is None:
+            continue
+        num = int(num)
+        if code:
+            did = code_to_id.get(code)
+            if did:
+                out[num] = did
+                by_code.add(num)
+        elif num not in by_code and num in num_to_id:
+            out[num] = num_to_id[num]
     return out
 
 
@@ -116,12 +129,15 @@ def ingest(api: OpenF1, years: list[int], races: pd.DataFrame, results: pd.DataF
                               "session_type": sess.session_type, "date_start": sess.date_start,
                               "date_end": sess.date_end})
             if sess.session_name in PRACTICE:
-                got = tag(api.get("laps", max_age=a, session_key=key), sess)
+                raw_laps = api.get("laps", max_age=a, session_key=key)
+                got = tag(raw_laps, sess)
                 if not got:
                     gaps.append({"kind": "openf1_no_laps", "season": season, "round": rnd,
                                  "session": sess.session_name})
                 laps += got
-                stints += tag(api.get("stints", max_age=a, session_key=key), sess)
+                raw_stints = clean_stints(api.get("stints", max_age=a, session_key=key),
+                                          raw_laps, season, rnd, sess.session_name, gaps)
+                stints += tag(raw_stints, sess)
             elif sess.session_name == "Qualifying":
                 # starting_grid is keyed by the *qualifying* session (404 with the race key)
                 got = tag(api.get("starting_grid", max_age=a, session_key=key), sess)
@@ -153,6 +169,30 @@ def ingest(api: OpenF1, years: list[int], races: pd.DataFrame, results: pd.DataF
         "of1_weather": pd.DataFrame(weather),
     }
     return tables, gaps
+
+
+def clean_stints(stints: list[dict], laps: list[dict], season: int, rnd: int,
+                 session_name: str, gaps: list[dict]) -> list[dict]:
+    """Drop support-series stints that OpenF1 mixes into F1 practice sessions.
+
+    Observed: an F1 FP3 returning stints for 38 car numbers (F2/F3 cars). Laps are clean, so
+    only cars with laps in the session are kept, and a car whose stint numbers repeat (an F1
+    and a support car sharing the number) is dropped entirely rather than guessed.
+    """
+    on_track = {r.get("driver_number") for r in laps}
+    kept = [s for s in stints if s.get("driver_number") in on_track]
+    seen: dict[int, set] = {}
+    clash: set[int] = set()
+    for s in kept:
+        n, k = s.get("driver_number"), s.get("stint_number")
+        if k in seen.setdefault(n, set()):
+            clash.add(n)
+        seen[n].add(k)
+    if len(kept) < len(stints) or clash:
+        gaps.append({"kind": "openf1_foreign_stints", "season": season, "round": rnd,
+                     "session": session_name, "dropped_rows": len(stints) - len(kept),
+                     "ambiguous_cars": sorted(clash)})
+    return [s for s in kept if s.get("driver_number") not in clash]
 
 
 def _tag(rows: list[dict], session_name: str, season: int, rnd: int, dmap: dict[int, str],

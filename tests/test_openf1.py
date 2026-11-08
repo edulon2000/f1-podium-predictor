@@ -59,10 +59,20 @@ def test_map_meetings_drops_testing_and_matches_rounds():
     assert set(m[m.meeting_key == 2]["round"]) == {21}
 
 
-def test_driver_map_by_code_then_number():
+def test_driver_map_code_wins_and_number_only_without_code():
     dmap = driver_map([{"driver_number": 1, "name_acronym": "NOR"},
-                       {"driver_number": 3, "name_acronym": "XXX"}], 2026, RESULTS, DRIVERS)
+                       {"driver_number": 3, "name_acronym": None}], 2026, RESULTS, DRIVERS)
     assert dmap == {1: "norris", 3: "max_verstappen"}
+
+
+def test_driver_map_ignores_support_series_driver_reusing_a_number():
+    # An F2 driver ("ARO") with car number 1 must not be mapped to the F1 #1 (Norris here),
+    # whatever the order of the rows.
+    rows = [{"driver_number": 1, "name_acronym": "ARO"},
+            {"driver_number": 1, "name_acronym": "NOR"},
+            {"driver_number": 1, "name_acronym": "ARO"}]
+    assert driver_map(rows, 2026, RESULTS, DRIVERS) == {1: "norris"}
+    assert driver_map(rows[:1], 2026, RESULTS, DRIVERS) == {}
 
 
 def test_ingest_only_fetches_finished_sessions_and_reports_unmapped():
@@ -85,3 +95,17 @@ def test_recent_sessions_use_ttl_old_ones_cached_forever():
     api = FakeOpenF1()
     ingest(api, [2026], RACES, RESULTS, DRIVERS, NOW + pd.Timedelta(days=30), ttl=3600)
     assert all(a is None for e, p, a in api.calls if p.get("session_key") == 10)
+
+
+def test_clean_stints_drops_support_series_and_ambiguous_cars():
+    from f1pred.openf1 import clean_stints
+    laps = [{"driver_number": 1}, {"driver_number": 4}]
+    stints = [
+        {"driver_number": 1, "stint_number": 1}, {"driver_number": 1, "stint_number": 2},
+        {"driver_number": 4, "stint_number": 1}, {"driver_number": 4, "stint_number": 1},  # clash
+        {"driver_number": 24, "stint_number": 1},                                        # F2 car
+    ]
+    gaps = []
+    out = clean_stints(stints, laps, 2025, 11, "Practice 3", gaps)
+    assert [(s["driver_number"], s["stint_number"]) for s in out] == [(1, 1), (1, 2)]
+    assert gaps[0]["dropped_rows"] == 1 and gaps[0]["ambiguous_cars"] == [4]
