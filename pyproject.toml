@@ -1,0 +1,46 @@
+[project]
+name = "f1pred"
+version = "0.1.0"
+description = "Predicting Formula 1 race winners and podiums — data ingestion and modelling"
+readme = "README.md"
+requires-python = ">=3.12"
+dependencies = [
+    "httpx>=0.27",
+    "pandas>=2.2",
+    "pyarrow>=16",
+]
+
+[project.optional-dependencies]
+explore = [
+    "fastf1>=3.4",
+    "matplotlib>=3.9",
+    "jupyter>=1.0",
+    "nbconvert>=7.16",
+]
+
+[project.scripts]
+f1pred-ingest = "f1pred.ingest:main"
+
+[dependency-groups]
+dev = [
+    "pytest>=8",
+    "ruff>=0.6",
+]
+
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[tool.hatch.build.targets.wheel]
+packages = ["src/f1pred"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+addopts = "-q"
+
+[tool.ruff]
+line-length = 100
+target-version = "py312"
+
+[tool.ruff.lint]
+select = ["E", "F", "I", "B", "UP", "SIM"]
