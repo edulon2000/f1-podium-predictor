@@ -6,6 +6,7 @@ import NextRace from './pages/NextRace'
 import TrackRecord from './pages/TrackRecord'
 import Season from './pages/Season'
 import Model from './pages/Model'
+import RaceDetail from './pages/RaceDetail'
 
 const NAV = [
   { to: '/', label: 'Next race' },
@@ -40,7 +41,10 @@ function NavItems({ onPick }: { onPick?: () => void }) {
 export default function App() {
   const [open, setOpen] = useState(false)
   const { pathname } = useLocation()
-  useEffect(() => setOpen(false), [pathname])
+  useEffect(() => {
+    setOpen(false)
+    window.scrollTo(0, 0)
+  }, [pathname])
 
   return (
     <div className="flex min-h-screen flex-col">
@@ -79,6 +83,7 @@ export default function App() {
           <Route path="/track-record" element={<TrackRecord />} />
           <Route path="/season" element={<Season />} />
           <Route path="/model" element={<Model />} />
+          <Route path="/race/:season/:round" element={<RaceDetail />} />
           <Route path="*" element={<p className="text-earth">Page not found.</p>} />
         </Routes>
       </main>

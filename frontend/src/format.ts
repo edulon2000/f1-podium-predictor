@@ -50,3 +50,19 @@ export const STAGE_LABEL = {
   t1: 'Before qualifying',
   t2: 'After qualifying',
 } as const
+
+export function ordinal(n: number) {
+  const s = ['th', 'st', 'nd', 'rd']
+  const v = n % 100
+  return `${n}${s[(v - 20) % 10] || s[v] || s[0]}`
+}
+
+/** "Pole", "2nd", "Pit lane"… for a starting position. */
+export function startedText(grid?: number | null) {
+  if (grid === null || grid === undefined) return 'Unknown'
+  if (grid === 0) return 'Pit lane'
+  return grid === 1 ? 'Pole' : ordinal(grid)
+}
+
+export const surname = (name?: string | null, family?: string | null) =>
+  family ?? (name ? name.split(' ').slice(-1)[0] : '')

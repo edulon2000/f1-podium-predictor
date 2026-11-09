@@ -1,9 +1,10 @@
 import { useMemo, useState } from 'react'
 import { ArrowDown, ArrowUp } from 'lucide'
 import type { DriverPrediction, Prediction } from '@/api'
-import { pct, STAGE_LABEL, teamColour } from '@/format'
+import { pct, STAGE_LABEL, startedText, surname, teamColour } from '@/format'
 import { FocusField } from './microkit/focus-input'
 import { Morph } from './Morph'
+import { EXPLAIN, Tip } from './Tip'
 
 type SortKey = 'p_win' | 'p_podium'
 
@@ -47,7 +48,7 @@ export function PredictionTable({ prediction }: { prediction: Prediction }) {
   return (
     <div>
       <div className="mb-3 flex flex-wrap items-end justify-between gap-3">
-        <FocusField label="Filter drivers" value={query} onChange={setQuery} placeholder="Name, code or team" />
+        <FocusField label="Find a driver" value={query} onChange={setQuery} placeholder="Name or team" />
         <p className="label">
           {rows.length} of {prediction.predictions.length} drivers
         </p>
@@ -59,14 +60,18 @@ export function PredictionTable({ prediction }: { prediction: Prediction }) {
           </caption>
           <thead>
             <tr className="label border-b border-night">
-              <th className="py-2 pr-2 text-left font-medium">Pos</th>
+              <th className="py-2 pr-2 text-left font-medium"><Tip text={EXPLAIN.rank}>Rank</Tip></th>
               <th className="py-2 pr-3 text-left font-medium">Driver</th>
-              {showGrid && <th className="py-2 pr-3 text-right font-medium">Grid</th>}
-              <th className="w-[38%] py-2 pr-3 text-left font-medium">
-                <SortButton active={sort === 'p_win'} desc={desc} onClick={sortBy('p_win')}>P(win)</SortButton>
+              {showGrid && <th className="py-2 pr-3 text-right font-medium"><Tip text={EXPLAIN.started}>Starts</Tip></th>}
+              <th className="w-[36%] py-2 pr-3 text-left font-medium">
+                <Tip text={EXPLAIN.chanceWin}>
+                  <SortButton active={sort === 'p_win'} desc={desc} onClick={sortBy('p_win')}>Chance to win</SortButton>
+                </Tip>
               </th>
               <th className="py-2 text-right font-medium">
-                <SortButton active={sort === 'p_podium'} desc={desc} onClick={sortBy('p_podium')}>P(podium)</SortButton>
+                <Tip text={EXPLAIN.chancePodium} align="right">
+                  <SortButton active={sort === 'p_podium'} desc={desc} onClick={sortBy('p_podium')}>Chance of podium</SortButton>
+                </Tip>
               </th>
             </tr>
           </thead>
@@ -86,13 +91,17 @@ export function PredictionTable({ prediction }: { prediction: Prediction }) {
                   <td className="py-2.5 pr-3">
                     <div className="flex items-center gap-3">
                       <span className="h-7 w-1 rounded-sm" style={{ background: teamColour(p.constructor_id) }} />
-                      <span className="narrow w-14 text-3xl leading-none font-extrabold uppercase">{p.code ?? p.driver_id}</span>
-                      <span className="hidden text-sm text-earth group-hover:text-night sm:inline">
-                        {p.name} <span className="text-dash group-hover:text-earth">· {p.team}</span>
+                      <span className="flex flex-col">
+                        <span className="narrow text-2xl leading-none font-extrabold uppercase sm:text-3xl">
+                          {surname(p.name, p.family_name)}
+                        </span>
+                        <span className="text-[12px] text-earth group-hover:text-night">
+                          {p.name} · {p.team}
+                        </span>
                       </span>
                     </div>
                   </td>
-                  {showGrid && <td className="py-2.5 pr-3 text-right font-mono tabular">{p.grid ?? '—'}</td>}
+                  {showGrid && <td className="py-2.5 pr-3 text-right font-mono text-sm">{startedText(p.grid)}</td>}
                   <td className="py-2.5 pr-3">
                     <div className="flex items-center gap-3">
                       <div className="h-2 w-full rounded-full bg-paper group-hover:bg-stone/70" aria-hidden>

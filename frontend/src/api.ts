@@ -32,6 +32,7 @@ export interface DriverPrediction {
   driver_id: string
   constructor_id: string
   name?: string
+  family_name?: string
   code?: string
   team?: string
   p_win: number
@@ -101,6 +102,60 @@ export interface DriverInfo {
   family_name: string
   code: string | null
   number: number | null
+}
+
+export interface Reason {
+  feature: string
+  label: string
+  effect: number
+}
+
+export interface StageDetail {
+  model: { kind: string; params?: Record<string, unknown>; same_era_weight?: number }
+  train_races: number
+  favourite: string
+  favourite_reasons: Reason[]
+  winner_reasons: Reason[] | null
+}
+
+export interface DriverDetail {
+  driver_id: string
+  name: string
+  family_name: string
+  code: string | null
+  constructor_id: string
+  team: string
+  grid: number | null
+  finish: number | null
+  status: string | null
+  points: number | null
+  quali_position: number | null
+  quali_gap_pct: number | null
+  practice_best_gap_pct: number | null
+  practice_longrun_gap_pct: number | null
+  t1_p_win?: number | null
+  t1_p_podium?: number | null
+  t1_rank?: number
+  t2_p_win?: number | null
+  t2_p_podium?: number | null
+  t2_rank?: number
+}
+
+export interface RaceDetail {
+  season: number
+  round: number
+  race_name: string
+  circuit_name: string | null
+  locality: string | null
+  country: string | null
+  race_start_utc: string | null
+  is_sprint_weekend: boolean
+  weather: Record<string, number | boolean | string | null> | null
+  status: 'done' | 'upcoming'
+  kind: 'backtest' | 'live'
+  drivers: DriverDetail[]
+  stages: Partial<Record<Stage, StageDetail>>
+  live: Partial<Record<Stage, { generated_at: string; predictions: DriverPrediction[] }>>
 }
 
 export class NotFound extends Error {}

@@ -128,7 +128,7 @@ export function ProbabilityDial({
     <figure className="rounded-xl bg-sun p-2.5 shadow-[0_18px_40px_-20px_rgba(12,16,24,0.45)]">
       <div className="rounded-lg bg-night px-4 pt-3 pb-4 text-stone">
         <div className="mb-1 flex items-center justify-between">
-          <span className="font-mono text-[0.62rem] tracking-[0.14em] text-stone/70 uppercase">Win probability</span>
+          <span className="font-mono text-[0.62rem] tracking-[0.14em] text-stone/70 uppercase">Chance to win</span>
           <span className="rounded-full bg-sun px-2 py-0.5 font-mono text-[0.62rem] tracking-[0.1em] text-night uppercase">
             {caption}
           </span>

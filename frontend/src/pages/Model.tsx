@@ -2,6 +2,7 @@ import type { EvalRow, Evaluation, Stage } from '@/api'
 import { Load, SectionTitle } from '@/components/core'
 import { useApi } from '@/hooks'
 import { pct, STAGE_LABEL } from '@/format'
+import { EXPLAIN, Tip } from '@/components/Tip'
 
 const MODEL_LABEL: Record<string, string> = {
   logreg: 'Logistic regression',
@@ -27,18 +28,16 @@ function Results({ rows, stage }: { rows: EvalRow[]; stage: Stage }) {
         return (
           <div key={w}>
             <p className="label mb-2">
-              {w} · {ws[0]?.races} races
+              <Tip text={EXPLAIN.holdout}>{w.replace('holdout', 'Test on')} · {ws[0]?.races} races</Tip>
             </p>
             <div className="overflow-x-auto">
               <table className="w-full min-w-[560px] border-collapse">
                 <thead>
                   <tr className="label border-b border-night">
-                    <th className="py-2 text-left font-medium">Predictor</th>
-                    <th className="w-[35%] py-2 text-left font-medium">Winner picked</th>
-                    <th className="py-2 text-right font-medium">Podium</th>
-                    <th className="py-2 text-right font-medium" title="−log P(actual winner); lower is better">
-                      Log-loss
-                    </th>
+                    <th className="py-2 text-left font-medium"><Tip text={EXPLAIN.baseline}>Method</Tip></th>
+                    <th className="w-[35%] py-2 text-left font-medium"><Tip text={EXPLAIN.pickedWinner}>Picked the winner</Tip></th>
+                    <th className="py-2 text-right font-medium"><Tip text={EXPLAIN.podiumGuessed} align="right">Podium places guessed</Tip></th>
+                    <th className="py-2 text-right font-medium"><Tip text={EXPLAIN.confidenceScore} align="right">Confidence score</Tip></th>
                   </tr>
                 </thead>
                 <tbody>
@@ -109,7 +108,7 @@ export default function Model() {
             {(['t2', 't1'] as Stage[]).map((s) => (
               <section key={s}>
                 <SectionTitle eyebrow={`Chosen: ${label(e.chosen[s].kind)}`}>
-                  {STAGE_LABEL[s]} vs baselines
+                  {STAGE_LABEL[s]}: model vs simple rules
                 </SectionTitle>
                 <Results rows={e.holdout} stage={s} />
               </section>
@@ -117,6 +116,40 @@ export default function Model() {
           </>
         )}
       </Load>
+      <Glossary />
     </div>
+  )
+}
+
+const GLOSSARY: [string, string][] = [
+  ['Chance to win', EXPLAIN.chanceWin],
+  ['Chance of a podium', EXPLAIN.chancePodium],
+  ['Our favourite', EXPLAIN.favourite],
+  ['Chance we gave the winner', EXPLAIN.chanceGivenToWinner],
+  ['Podium places guessed', EXPLAIN.podiumGuessed],
+  ['Before / after qualifying', EXPLAIN.stage],
+  ['Confidence score (log-loss)', EXPLAIN.confidenceScore],
+  ['Baseline', EXPLAIN.baseline + ' “Calibrated” versions use how often each grid slot (or standings position) won in the past instead of betting everything on one driver.'],
+  ['Test races', EXPLAIN.holdout],
+  ['Replay', EXPLAIN.backtest],
+  ['Pole', 'First place on the starting grid, earned by setting the fastest lap in qualifying.'],
+  ['Qualifying', 'The session the day before the race that decides the starting order.'],
+  ['Practice', 'Free sessions before qualifying where teams test their cars; we use the lap times to estimate race pace.'],
+  ['Sprint', 'A short extra race on Saturday at some events, with fewer points.'],
+]
+
+function Glossary() {
+  return (
+    <section id="glossary" className="scroll-mt-24">
+      <SectionTitle eyebrow="Plain-language definitions">Glossary</SectionTitle>
+      <dl className="grid gap-x-10 gap-y-5 sm:grid-cols-2">
+        {GLOSSARY.map(([term, def]) => (
+          <div key={term} className="border-t border-rule pt-3">
+            <dt className="font-semibold">{term}</dt>
+            <dd className="mt-0.5 text-sm text-earth">{def}</dd>
+          </div>
+        ))}
+      </dl>
+    </section>
   )
 }

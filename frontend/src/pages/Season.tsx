@@ -1,10 +1,13 @@
+import { useNavigate } from 'react-router-dom'
 import type { Race } from '@/api'
 import { Load, SectionTitle } from '@/components/core'
 import { useApi } from '@/hooks'
-import { formatLocal, teamColour } from '@/format'
+import { formatLocal, startedText, surname, teamColour } from '@/format'
+import { EXPLAIN, Tip } from '@/components/Tip'
 
 export default function Season() {
   const races = useApi<Race[]>('/races?season=2026')
+  const navigate = useNavigate()
   return (
     <Load value={races}>
       {(rs) => {
@@ -26,23 +29,28 @@ export default function Season() {
                 <table className="w-full min-w-[520px] border-collapse">
                   <thead>
                     <tr className="label border-b border-night">
-                      <th className="py-2 text-left font-medium">Rd</th>
+                      <th className="py-2 text-left font-medium">Round</th>
                       <th className="py-2 text-left font-medium">Grand Prix</th>
                       <th className="py-2 text-left font-medium">Winner</th>
-                      <th className="py-2 text-right font-medium">From</th>
+                      <th className="py-2 text-right font-medium"><Tip text={EXPLAIN.started} align="right">Winner started</Tip></th>
                     </tr>
                   </thead>
                   <tbody>
                     {rs.map((r) => {
                       const pole = r.winner?.grid === 1
+                      const linkable = r.status === 'done' || r.prediction_stages.length > 0
+                      const go = () => linkable && navigate(`/race/${r.season}/${r.round}`)
                       return (
                         <tr
                           key={r.round}
-                          className={`group border-b border-rule transition-colors duration-[320ms] ease-[cubic-bezier(.22,1,.36,1)] hover:bg-sun ${
+                          tabIndex={linkable ? 0 : -1}
+                          onClick={go}
+                          onKeyDown={(e) => e.key === 'Enter' && go()}
+                          className={`group border-b border-rule transition-colors duration-[320ms] ease-[cubic-bezier(.22,1,.36,1)] hover:bg-sun focus-visible:bg-sun ${
                             r.status === 'upcoming' ? 'text-earth' : ''
-                          }`}
+                          } ${linkable ? 'cursor-pointer' : ''}`}
                         >
-                          <td className="py-2 font-mono text-sm tabular text-earth">{String(r.round).padStart(2, '0')}</td>
+                          <td className="py-2 font-mono text-sm tabular text-earth">{r.round}</td>
                           <td className="narrow py-2 text-2xl font-extrabold uppercase sm:text-3xl">
                             {r.race_name.replace(' Grand Prix', '')}
                             {r.is_sprint_weekend && <span className="label ml-2 align-middle">sprint</span>}
@@ -51,7 +59,7 @@ export default function Season() {
                             {r.winner ? (
                               <span className="inline-flex items-center gap-2">
                                 <span className="h-5 w-1 rounded-sm" style={{ background: teamColour(teamId(r.winner.team)) }} />
-                                <span className="font-mono font-semibold">{r.winner.code}</span>
+                                <span className="font-semibold">{surname(r.winner.name, null)}</span>
                                 <span className="hidden text-sm text-earth sm:inline">{r.winner.team}</span>
                               </span>
                             ) : (
@@ -61,9 +69,9 @@ export default function Season() {
                           <td className="py-2 text-right font-mono tabular">
                             {r.winner &&
                               (pole ? (
-                                <span className="rounded bg-sun px-1.5 py-0.5 group-hover:bg-night group-hover:text-sun">P1</span>
+                                <span className="rounded bg-sun px-1.5 py-0.5 group-hover:bg-night group-hover:text-sun">Pole</span>
                               ) : (
-                                `P${r.winner.grid ?? '?'}`
+                                startedText(r.winner.grid)
                               ))}
                           </td>
                         </tr>
@@ -75,13 +83,13 @@ export default function Season() {
             </section>
             <aside className="space-y-10">
               <div>
-                <p className="label">Won from pole</p>
+                <p className="label"><Tip text="Races won by the driver who started first.">Won from pole</Tip></p>
                 <p className="narrow text-[7rem] leading-[0.85] font-extrabold tabular">
                   {fromPole}
                   <span className="text-5xl text-earth">/{done.length}</span>
                 </p>
                 <p className="mt-2 text-sm text-earth">
-                  races won from P1 in 2026, which is why “the pole-sitter wins” is the baseline the model has to beat.
+                  races won from pole in 2026, which is why “the pole-sitter wins” is the baseline the model has to beat.
                 </p>
               </div>
               <div>

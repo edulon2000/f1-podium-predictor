@@ -24,9 +24,9 @@ function ReplayStats() {
   const rows = bt.state === 'ready' ? (bt.data.t2 ?? []) : []
   const stats: [string, string][] = rows.length
     ? [
-        [String(rows.length), 'races of 2026 replayed'],
+        [String(rows.length), '2026 races replayed'],
         [String(rows.filter((r) => r.pole_won).length), 'won from pole'],
-        [String(rows.filter((r) => r.predicted === r.actual).length), 'called by the model'],
+        [String(rows.filter((r) => r.predicted === r.actual).length), 'winners we called'],
       ]
     : []
   return (
