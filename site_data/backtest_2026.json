@@ -1,0 +1,766 @@
+{
+  "t1": [
+    {
+      "season": 2026,
+      "round": 1,
+      "predicted": "max_verstappen",
+      "p_predicted": 0.3412,
+      "actual": "russell",
+      "p_actual": 0.0949,
+      "predicted_podium": [
+        "norris",
+        "piastri",
+        "max_verstappen"
+      ],
+      "actual_podium": [
+        "russell",
+        "antonelli",
+        "leclerc"
+      ],
+      "pole_won": true
+    },
+    {
+      "season": 2026,
+      "round": 2,
+      "predicted": "russell",
+      "p_predicted": 0.4674,
+      "actual": "antonelli",
+      "p_actual": 0.0953,
+      "predicted_podium": [
+        "russell",
+        "norris",
+        "antonelli"
+      ],
+      "actual_podium": [
+        "antonelli",
+        "russell",
+        "hamilton"
+      ],
+      "pole_won": true
+    },
+    {
+      "season": 2026,
+      "round": 3,
+      "predicted": "russell",
+      "p_predicted": 0.3901,
+      "actual": "antonelli",
+      "p_actual": 0.1979,
+      "predicted_podium": [
+        "russell",
+        "antonelli",
+        "leclerc"
+      ],
+      "actual_podium": [
+        "antonelli",
+        "piastri",
+        "leclerc"
+      ],
+      "pole_won": true
+    },
+    {
+      "season": 2026,
+      "round": 4,
+      "predicted": "piastri",
+      "p_predicted": 0.7435,
+      "actual": "antonelli",
+      "p_actual": 0.0767,
+      "predicted_podium": [
+        "piastri",
+        "russell",
+        "antonelli"
+      ],
+      "actual_podium": [
+        "antonelli",
+        "norris",
+        "piastri"
+      ],
+      "pole_won": true
+    },
+    {
+      "season": 2026,
+      "round": 5,
+      "predicted": "antonelli",
+      "p_predicted": 0.4147,
+      "actual": "antonelli",
+      "p_actual": 0.4147,
+      "predicted_podium": [
+        "antonelli",
+        "russell",
+        "norris"
+      ],
+      "actual_podium": [
+        "antonelli",
+        "hamilton",
+        "max_verstappen"
+      ],
+      "pole_won": false
+    },
+    {
+      "season": 2026,
+      "round": 6,
+      "predicted": "antonelli",
+      "p_predicted": 0.4447,
+      "actual": "antonelli",
+      "p_actual": 0.4447,
+      "predicted_podium": [
+        "antonelli",
+        "russell",
+        "leclerc"
+      ],
+      "actual_podium": [
+        "antonelli",
+        "hamilton",
+        "hadjar"
+      ],
+      "pole_won": true
+    },
+    {
+      "season": 2026,
+      "round": 7,
+      "predicted": "antonelli",
+      "p_predicted": 0.4075,
+      "actual": "hamilton",
+      "p_actual": 0.0558,
+      "predicted_podium": [
+        "russell",
+        "antonelli",
+        "piastri"
+      ],
+      "actual_podium": [
+        "hamilton",
+        "russell",
+        "norris"
+      ],
+      "pole_won": false
+    },
+    {
+      "season": 2026,
+      "round": 8,
+      "predicted": "antonelli",
+      "p_predicted": 0.3695,
+      "actual": "russell",
+      "p_actual": 0.2126,
+      "predicted_podium": [
+        "russell",
+        "antonelli",
+        "hamilton"
+      ],
+      "actual_podium": [
+        "russell",
+        "max_verstappen",
+        "antonelli"
+      ],
+      "pole_won": true
+    },
+    {
+      "season": 2026,
+      "round": 9,
+      "predicted": "antonelli",
+      "p_predicted": 0.3359,
+      "actual": "leclerc",
+      "p_actual": 0.0641,
+      "predicted_podium": [
+        "antonelli",
+        "russell",
+        "hamilton"
+      ],
+      "actual_podium": [
+        "leclerc",
+        "russell",
+        "hamilton"
+      ],
+      "pole_won": false
+    },
+    {
+      "season": 2026,
+      "round": 10,
+      "predicted": "antonelli",
+      "p_predicted": 0.3089,
+      "actual": "antonelli",
+      "p_actual": 0.3089,
+      "predicted_podium": [
+        "russell",
+        "antonelli",
+        "leclerc"
+      ],
+      "actual_podium": [
+        "antonelli",
+        "leclerc",
+        "max_verstappen"
+      ],
+      "pole_won": true
+    },
+    {
+      "season": 2026,
+      "round": 11,
+      "predicted": "antonelli",
+      "p_predicted": 0.3181,
+      "actual": "norris",
+      "p_actual": 0.0575,
+      "predicted_podium": [
+        "antonelli",
+        "russell",
+        "leclerc"
+      ],
+      "actual_podium": [
+        "norris",
+        "max_verstappen",
+        "antonelli"
+      ],
+      "pole_won": true
+    },
+    {
+      "season": 2026,
+      "round": 12,
+      "predicted": "antonelli",
+      "p_predicted": 0.4399,
+      "actual": "norris",
+      "p_actual": 0.1092,
+      "predicted_podium": [
+        "antonelli",
+        "russell",
+        "norris"
+      ],
+      "actual_podium": [
+        "norris",
+        "antonelli",
+        "russell"
+      ],
+      "pole_won": true
+    },
+    {
+      "season": 2026,
+      "round": 13,
+      "predicted": "antonelli",
+      "p_predicted": 0.2948,
+      "actual": "antonelli",
+      "p_actual": 0.2948,
+      "predicted_podium": [
+        "antonelli",
+        "russell",
+        "norris"
+      ],
+      "actual_podium": [
+        "antonelli",
+        "russell",
+        "max_verstappen"
+      ],
+      "pole_won": false
+    },
+    {
+      "season": 2026,
+      "round": 14,
+      "predicted": "antonelli",
+      "p_predicted": 0.3678,
+      "actual": "antonelli",
+      "p_actual": 0.3678,
+      "predicted_podium": [
+        "antonelli",
+        "russell",
+        "norris"
+      ],
+      "actual_podium": [
+        "antonelli",
+        "max_verstappen",
+        "norris"
+      ],
+      "pole_won": false
+    },
+    {
+      "season": 2026,
+      "round": 15,
+      "predicted": "antonelli",
+      "p_predicted": 0.4257,
+      "actual": "russell",
+      "p_actual": 0.2056,
+      "predicted_podium": [
+        "antonelli",
+        "russell",
+        "norris"
+      ],
+      "actual_podium": [
+        "russell",
+        "max_verstappen",
+        "hadjar"
+      ],
+      "pole_won": true
+    },
+    {
+      "season": 2026,
+      "round": 16,
+      "predicted": "russell",
+      "p_predicted": 0.3117,
+      "actual": "max_verstappen",
+      "p_actual": 0.1159,
+      "predicted_podium": [
+        "russell",
+        "antonelli",
+        "max_verstappen"
+      ],
+      "actual_podium": [
+        "max_verstappen",
+        "antonelli",
+        "hamilton"
+      ],
+      "pole_won": true
+    },
+    {
+      "season": 2026,
+      "round": 17,
+      "predicted": "antonelli",
+      "p_predicted": 0.3441,
+      "actual": "max_verstappen",
+      "p_actual": 0.1305,
+      "predicted_podium": [
+        "antonelli",
+        "max_verstappen",
+        "leclerc"
+      ],
+      "actual_podium": [
+        "max_verstappen",
+        "leclerc",
+        "antonelli"
+      ],
+      "pole_won": true
+    },
+    {
+      "season": 2026,
+      "round": 18,
+      "predicted": "antonelli",
+      "p_predicted": 0.3013,
+      "actual": "antonelli",
+      "p_actual": 0.3013,
+      "predicted_podium": [
+        "antonelli",
+        "max_verstappen",
+        "russell"
+      ],
+      "actual_podium": [
+        "antonelli",
+        "leclerc",
+        "max_verstappen"
+      ],
+      "pole_won": true
+    },
+    {
+      "season": 2026,
+      "round": 19,
+      "predicted": "antonelli",
+      "p_predicted": 0.341,
+      "actual": "max_verstappen",
+      "p_actual": 0.1765,
+      "predicted_podium": [
+        "antonelli",
+        "max_verstappen",
+        "leclerc"
+      ],
+      "actual_podium": [
+        "max_verstappen",
+        "hamilton",
+        "antonelli"
+      ],
+      "pole_won": false
+    },
+    {
+      "season": 2026,
+      "round": 20,
+      "predicted": "antonelli",
+      "p_predicted": 0.3729,
+      "actual": "norris",
+      "p_actual": 0.0678,
+      "predicted_podium": [
+        "antonelli",
+        "max_verstappen",
+        "russell"
+      ],
+      "actual_podium": [
+        "norris",
+        "max_verstappen",
+        "hadjar"
+      ],
+      "pole_won": true
+    }
+  ],
+  "t2": [
+    {
+      "season": 2026,
+      "round": 1,
+      "predicted": "russell",
+      "p_predicted": 0.5781,
+      "actual": "russell",
+      "p_actual": 0.5781,
+      "predicted_podium": [
+        "russell",
+        "antonelli",
+        "piastri"
+      ],
+      "actual_podium": [
+        "russell",
+        "antonelli",
+        "leclerc"
+      ],
+      "pole_won": true
+    },
+    {
+      "season": 2026,
+      "round": 2,
+      "predicted": "russell",
+      "p_predicted": 0.3515,
+      "actual": "antonelli",
+      "p_actual": 0.303,
+      "predicted_podium": [
+        "russell",
+        "antonelli",
+        "leclerc"
+      ],
+      "actual_podium": [
+        "antonelli",
+        "russell",
+        "hamilton"
+      ],
+      "pole_won": true
+    },
+    {
+      "season": 2026,
+      "round": 3,
+      "predicted": "antonelli",
+      "p_predicted": 0.6801,
+      "actual": "antonelli",
+      "p_actual": 0.6801,
+      "predicted_podium": [
+        "antonelli",
+        "russell",
+        "piastri"
+      ],
+      "actual_podium": [
+        "antonelli",
+        "piastri",
+        "leclerc"
+      ],
+      "pole_won": true
+    },
+    {
+      "season": 2026,
+      "round": 4,
+      "predicted": "antonelli",
+      "p_predicted": 0.644,
+      "actual": "antonelli",
+      "p_actual": 0.644,
+      "predicted_podium": [
+        "antonelli",
+        "max_verstappen",
+        "leclerc"
+      ],
+      "actual_podium": [
+        "antonelli",
+        "norris",
+        "piastri"
+      ],
+      "pole_won": true
+    },
+    {
+      "season": 2026,
+      "round": 5,
+      "predicted": "russell",
+      "p_predicted": 0.6176,
+      "actual": "antonelli",
+      "p_actual": 0.1603,
+      "predicted_podium": [
+        "russell",
+        "antonelli",
+        "norris"
+      ],
+      "actual_podium": [
+        "antonelli",
+        "hamilton",
+        "max_verstappen"
+      ],
+      "pole_won": false
+    },
+    {
+      "season": 2026,
+      "round": 6,
+      "predicted": "antonelli",
+      "p_predicted": 0.6733,
+      "actual": "antonelli",
+      "p_actual": 0.6733,
+      "predicted_podium": [
+        "antonelli",
+        "hamilton",
+        "max_verstappen"
+      ],
+      "actual_podium": [
+        "antonelli",
+        "hamilton",
+        "hadjar"
+      ],
+      "pole_won": true
+    },
+    {
+      "season": 2026,
+      "round": 7,
+      "predicted": "russell",
+      "p_predicted": 0.4179,
+      "actual": "hamilton",
+      "p_actual": 0.1526,
+      "predicted_podium": [
+        "russell",
+        "hamilton",
+        "antonelli"
+      ],
+      "actual_podium": [
+        "hamilton",
+        "russell",
+        "norris"
+      ],
+      "pole_won": false
+    },
+    {
+      "season": 2026,
+      "round": 8,
+      "predicted": "russell",
+      "p_predicted": 0.6135,
+      "actual": "russell",
+      "p_actual": 0.6135,
+      "predicted_podium": [
+        "russell",
+        "leclerc",
+        "hamilton"
+      ],
+      "actual_podium": [
+        "russell",
+        "max_verstappen",
+        "antonelli"
+      ],
+      "pole_won": true
+    },
+    {
+      "season": 2026,
+      "round": 9,
+      "predicted": "antonelli",
+      "p_predicted": 0.6688,
+      "actual": "leclerc",
+      "p_actual": 0.0404,
+      "predicted_podium": [
+        "antonelli",
+        "hamilton",
+        "leclerc"
+      ],
+      "actual_podium": [
+        "leclerc",
+        "russell",
+        "hamilton"
+      ],
+      "pole_won": false
+    },
+    {
+      "season": 2026,
+      "round": 10,
+      "predicted": "antonelli",
+      "p_predicted": 0.74,
+      "actual": "antonelli",
+      "p_actual": 0.74,
+      "predicted_podium": [
+        "antonelli",
+        "max_verstappen",
+        "russell"
+      ],
+      "actual_podium": [
+        "antonelli",
+        "leclerc",
+        "max_verstappen"
+      ],
+      "pole_won": true
+    },
+    {
+      "season": 2026,
+      "round": 11,
+      "predicted": "norris",
+      "p_predicted": 0.4218,
+      "actual": "norris",
+      "p_actual": 0.4218,
+      "predicted_podium": [
+        "norris",
+        "leclerc",
+        "hamilton"
+      ],
+      "actual_podium": [
+        "norris",
+        "max_verstappen",
+        "antonelli"
+      ],
+      "pole_won": true
+    },
+    {
+      "season": 2026,
+      "round": 12,
+      "predicted": "norris",
+      "p_predicted": 0.4965,
+      "actual": "norris",
+      "p_actual": 0.4965,
+      "predicted_podium": [
+        "antonelli",
+        "norris",
+        "russell"
+      ],
+      "actual_podium": [
+        "norris",
+        "antonelli",
+        "russell"
+      ],
+      "pole_won": true
+    },
+    {
+      "season": 2026,
+      "round": 13,
+      "predicted": "russell",
+      "p_predicted": 0.584,
+      "actual": "antonelli",
+      "p_actual": 0.0838,
+      "predicted_podium": [
+        "russell",
+        "leclerc",
+        "antonelli"
+      ],
+      "actual_podium": [
+        "antonelli",
+        "russell",
+        "max_verstappen"
+      ],
+      "pole_won": false
+    },
+    {
+      "season": 2026,
+      "round": 14,
+      "predicted": "antonelli",
+      "p_predicted": 0.5107,
+      "actual": "antonelli",
+      "p_actual": 0.5107,
+      "predicted_podium": [
+        "antonelli",
+        "norris",
+        "hamilton"
+      ],
+      "actual_podium": [
+        "antonelli",
+        "max_verstappen",
+        "norris"
+      ],
+      "pole_won": false
+    },
+    {
+      "season": 2026,
+      "round": 15,
+      "predicted": "russell",
+      "p_predicted": 0.7315,
+      "actual": "russell",
+      "p_actual": 0.7315,
+      "predicted_podium": [
+        "russell",
+        "leclerc",
+        "hadjar"
+      ],
+      "actual_podium": [
+        "russell",
+        "max_verstappen",
+        "hadjar"
+      ],
+      "pole_won": true
+    },
+    {
+      "season": 2026,
+      "round": 16,
+      "predicted": "max_verstappen",
+      "p_predicted": 0.6449,
+      "actual": "max_verstappen",
+      "p_actual": 0.6449,
+      "predicted_podium": [
+        "max_verstappen",
+        "antonelli",
+        "hamilton"
+      ],
+      "actual_podium": [
+        "max_verstappen",
+        "antonelli",
+        "hamilton"
+      ],
+      "pole_won": true
+    },
+    {
+      "season": 2026,
+      "round": 17,
+      "predicted": "max_verstappen",
+      "p_predicted": 0.4452,
+      "actual": "max_verstappen",
+      "p_actual": 0.4452,
+      "predicted_podium": [
+        "max_verstappen",
+        "leclerc",
+        "antonelli"
+      ],
+      "actual_podium": [
+        "max_verstappen",
+        "leclerc",
+        "antonelli"
+      ],
+      "pole_won": true
+    },
+    {
+      "season": 2026,
+      "round": 18,
+      "predicted": "antonelli",
+      "p_predicted": 0.6656,
+      "actual": "antonelli",
+      "p_actual": 0.6656,
+      "predicted_podium": [
+        "antonelli",
+        "max_verstappen",
+        "leclerc"
+      ],
+      "actual_podium": [
+        "antonelli",
+        "leclerc",
+        "max_verstappen"
+      ],
+      "pole_won": true
+    },
+    {
+      "season": 2026,
+      "round": 19,
+      "predicted": "hamilton",
+      "p_predicted": 0.4273,
+      "actual": "max_verstappen",
+      "p_actual": 0.0482,
+      "predicted_podium": [
+        "russell",
+        "antonelli",
+        "hamilton"
+      ],
+      "actual_podium": [
+        "max_verstappen",
+        "hamilton",
+        "antonelli"
+      ],
+      "pole_won": false
+    },
+    {
+      "season": 2026,
+      "round": 20,
+      "predicted": "antonelli",
+      "p_predicted": 0.4707,
+      "actual": "norris",
+      "p_actual": 0.3052,
+      "predicted_podium": [
+        "antonelli",
+        "max_verstappen",
+        "norris"
+      ],
+      "actual_podium": [
+        "norris",
+        "max_verstappen",
+        "hadjar"
+      ],
+      "pole_won": true
+    }
+  ]
+}
