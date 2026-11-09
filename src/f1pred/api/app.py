@@ -152,6 +152,12 @@ def prediction(season: int, rnd: int, stage: Literal["t1", "t2"] = "t2") -> dict
     return read_json(f"predictions/{season}_R{rnd:02d}_{stage}.json")
 
 
+@app.get("/api/races/{season}/{rnd}/detail")
+def race_detail(season: int, rnd: int) -> dict:
+    """Everything about one race: results, both forecasts, and why the model chose its pick."""
+    return read_json(f"races/{season}_R{rnd:02d}.json")
+
+
 @app.get("/api/scoreboard", response_model=list[ScoreRow])
 def scoreboard() -> list[dict]:
     return read_json("scoreboard.json")

@@ -31,6 +31,7 @@ def client(tmp_path, monkeypatch):
     write(data, "scoreboard.json", [])
     write(data, "meta.json", {"generated_at": "x", "latest_race": "Brazilian Grand Prix"})
     write(data, "evaluation.json", {"chosen": {}})
+    write(data, "races/2026_R20.json", {"round": 20, "drivers": [], "stages": {}})
     (dist / "assets").mkdir(parents=True)
     (dist / "index.html").write_text("<html>spa</html>", encoding="utf-8")
     monkeypatch.setenv("SITE_DATA_DIR", str(data))
@@ -68,3 +69,8 @@ def test_spa_fallback_serves_index(client):
 def test_path_traversal_blocked(client):
     r = client.get("/..%2F..%2Fsite_data%2Fmeta.json")
     assert "spa" in r.text or r.status_code == 404
+
+
+def test_race_detail(client):
+    assert client.get("/api/races/2026/20/detail").json()["round"] == 20
+    assert client.get("/api/races/2026/5/detail").status_code == 404
