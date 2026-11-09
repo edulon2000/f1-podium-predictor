@@ -1,6 +1,6 @@
 import { useState } from 'react'
 import type { BacktestRow, DriverInfo, Race, ScoreRow, Stage } from '../api'
-import { Check, Load, Notice, SectionTitle } from '../components'
+import { Check, Load, Notice, SectionTitle } from '@/components/core'
 import { useApi } from '../hooks'
 import { pct, STAGE_LABEL } from '../format'
 

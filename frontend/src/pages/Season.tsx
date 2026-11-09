@@ -1,5 +1,5 @@
 import type { Race } from '../api'
-import { Load, SectionTitle } from '../components'
+import { Load, SectionTitle } from '@/components/core'
 import { useApi } from '../hooks'
 import { formatLocal } from '../format'
 

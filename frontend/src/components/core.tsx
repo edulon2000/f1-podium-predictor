@@ -1,7 +1,7 @@
 import type { ReactNode } from 'react'
-import type { DriverPrediction, Prediction } from './api'
-import type { Loadable } from './hooks'
-import { formatUtc, pct, STAGE_LABEL, teamColour } from './format'
+import type { DriverPrediction, Prediction } from '@/api'
+import type { Loadable } from '@/hooks'
+import { formatUtc, pct, STAGE_LABEL, teamColour } from '@/format'
 
 export function SectionTitle({ eyebrow, children }: { eyebrow?: string; children: ReactNode }) {
   return (

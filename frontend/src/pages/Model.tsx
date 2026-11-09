@@ -1,5 +1,5 @@
 import type { EvalRow, Evaluation, Stage } from '../api'
-import { Load, SectionTitle } from '../components'
+import { Load, SectionTitle } from '@/components/core'
 import { useApi } from '../hooks'
 import { pct, STAGE_LABEL } from '../format'
 

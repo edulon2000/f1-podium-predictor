@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react'
 import { Link } from 'react-router-dom'
 import type { BacktestRow, Prediction, Race, Stage } from '../api'
-import { IssueStamp, Load, Notice, SectionTitle, TimingTower } from '../components'
+import { IssueStamp, Load, Notice, SectionTitle, TimingTower } from '@/components/core'
 import { useApi, useNow } from '../hooks'
 import { countdownParts, formatLocal, STAGE_LABEL } from '../format'
 
