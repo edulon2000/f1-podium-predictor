@@ -28,6 +28,7 @@ explore = [
 [project.scripts]
 f1pred-ingest = "f1pred.ingest:main"
 f1pred-ingest-openf1 = "f1pred.openf1:main"
+f1pred-ingest-weather = "f1pred.weather:main"
 f1pred-predict = "f1pred.predict:main"
 f1pred-score = "f1pred.predict:score_main"
 f1pred-export = "f1pred.export:main"
