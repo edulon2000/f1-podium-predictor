@@ -90,6 +90,7 @@ def export_predictions(t: dict, pred_dir: Path, out_dir: Path) -> list[str]:
             d = drivers.get(rec["driver_id"], {})
             rec["name"] = d.get("name", rec["driver_id"])
             rec["code"] = d.get("code")
+            rec["family_name"] = d.get("family_name", rec["driver_id"])
             rec["team"] = teams.get(rec["constructor_id"], rec["constructor_id"])
         _write(out_dir / "predictions" / path.name, p)
         written.append(path.name)
@@ -140,7 +141,8 @@ def export_details(t: dict, frame: pd.DataFrame, season: int, pred_dir: Path
     races = t["races"][t["races"].season == season].set_index("round")
     circuits = t["circuits"].set_index("circuit_id")
     res = t["results"][t["results"].season == season]
-    weather = t.get("weather", t.get("of1_weather"))
+    weather_tables = [w for w in (t.get("weather"), t.get("of1_weather"))
+                      if w is not None and len(w)]
     specs = {s: load_spec(s, Path("configs")) for s in ("t1", "t2")}
     hist = frame[frame["win"].notna()]
     details: dict[int, dict] = {}
@@ -158,11 +160,11 @@ def export_details(t: dict, frame: pd.DataFrame, season: int, pred_dir: Path
         r = races.loc[rnd]
         c = circuits.loc[r.circuit_id] if r.circuit_id in circuits.index else None
         w = None
-        if weather is not None and len(weather):
+        for weather in weather_tables:
             ww = weather[(weather.season == season) & (weather["round"] == rnd)]
             if len(ww):
                 x = ww.iloc[0]
-                w = {}
+                w = w or {}
                 for k, v in x.drop(labels=["season", "round"]).items():
                     if v is None or (not isinstance(v, str) and pd.isna(v)):
                         w[k] = None
@@ -193,6 +195,7 @@ def export_details(t: dict, frame: pd.DataFrame, season: int, pred_dir: Path
             cat = status_category(st) if isinstance(st, str) else ""
             rows.append({
                 "driver_id": x.driver_id, "name": d.get("name", x.driver_id), "code": d.get("code"),
+                "family_name": d.get("family_name", x.driver_id),
                 "constructor_id": x.constructor_id,
                 "team": teams.get(x.constructor_id, x.constructor_id),
                 "grid": _int(x.grid_f), "finish": _int(x.finish_pos),
@@ -235,6 +238,7 @@ def export_details(t: dict, frame: pd.DataFrame, season: int, pred_dir: Path
                 "p_actual": None if winner.empty else _num(winner.p_win.iloc[0]),
                 "predicted_podium": list(pp.sort_values("p_podium", ascending=False)
                                          .driver_id.head(3)),
+                "top3": list(pp.sort_values("p_win", ascending=False).driver_id.head(3)),
                 "actual_podium": list(pp[pp.podium == 1].sort_values("finish_pos").driver_id),
                 "pole_won": bool((winner.grid_f == 1).any()),
             })

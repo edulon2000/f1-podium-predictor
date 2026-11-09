@@ -69,6 +69,9 @@ def predict_race(t: dict, season: int, rnd: int, stage: str, spec: ModelSpec,
                              "re-run the ingestion after qualifying, or use --stage t1")
     if season >= 2023 and test["has_practice"].sum() == 0:
         warnings.append("no practice data for this race (run f1pred-ingest-openf1 after FP)")
+    wx = "wx_rain_d2" if stage == "t1" else "wx_rain_d1"
+    if wx in spec.features and test[wx].isna().all():
+        warnings.append("no weather forecast for this race (run f1pred-ingest-weather first)")
 
     fitted = spec.fit(train, season)
     pred = spec.predict(fitted, test)
