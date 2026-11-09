@@ -123,3 +123,20 @@ def test_targets_present_for_history_and_absent_for_target():
 def test_first_appearance_has_no_history(col):
     f = build_features(synthetic())
     assert rows(f, 2025, 1)[col].isna().all()
+
+
+def test_quali_times_fall_back_to_openf1_laps_then_published_position():
+    t = synthetic()
+    q = t["qualifying"]
+    m = (q.season == 2026) & (q["round"] == 5)
+    t["qualifying"].loc[m, ["q1_s", "q2_s", "q3_s"]] = np.nan  # positions only, like Jolpica
+    pos = q.loc[m].set_index("driver_id")["position"]
+    f = rows(build_features(t), 2026, 5)
+    assert (f["quali_rank"] == pos.sort_index()).all()  # falls back to the published position
+    # with OpenF1 laps available, the rank and gap come from the lap times
+    laps = {d: 80 + i * 0.3 for i, d in enumerate(reversed(DRIVERS))}
+    t["of1_grid"] = pd.DataFrame({"season": 2026, "round": 5, "driver_id": list(laps),
+                                  "grid_position": range(1, 7), "quali_lap_s": list(laps.values())})
+    f = rows(build_features(t), 2026, 5)
+    assert f.loc["f", "quali_rank"] == 1 and f.loc["f", "quali_gap_pct"] == 0
+    assert f.loc["a", "quali_gap_pct"] == pytest.approx((81.5 / 80 - 1) * 100)

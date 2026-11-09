@@ -110,11 +110,23 @@ def build_features(
     base["pts"] = base["points"].astype(float)
 
     # ---- qualifying (T2 info for its own race; lagged form for T1) ----
-    q = add_quali_pace(t["qualifying"])[["season", "round", "driver_id", "best_q_s",
+    q = add_quali_pace(t["qualifying"])[["season", "round", "driver_id", "position", "best_q_s",
                                           "quali_gap_pct", "reached_q3"]]
+    q = q.rename(columns={"position": "quali_pos_published"})
     base = base.merge(q, on=KEYS, how="left")
+    # Jolpica sometimes publishes qualifying positions before the lap times (e.g. right after
+    # the session). Fill the best lap from OpenF1's starting grid, which carries it.
+    if "of1_grid" in t and len(t["of1_grid"]):
+        ql = t["of1_grid"][["season", "round", "driver_id", "quali_lap_s"]]
+        ql = base[KEYS].merge(ql, on=KEYS, how="left")["quali_lap_s"].astype(float)
+        base["best_q_s"] = base["best_q_s"].fillna(ql)
+        fastest = base.groupby("race_idx")["best_q_s"].transform("min")
+        gap = ((base["best_q_s"] / fastest - 1) * 100).clip(upper=7.0)
+        base["quali_gap_pct"] = base["quali_gap_pct"].fillna(gap)
     base["quali_rank"] = base.groupby("race_idx")["best_q_s"].rank(method="min")
-    base["quali_rank"] = base["quali_rank"].fillna(base["field_size"])  # no time → back
+    # no time at all: use the published position, else the back of the grid
+    base["quali_rank"] = base["quali_rank"].fillna(base["quali_pos_published"].astype(float))
+    base["quali_rank"] = base["quali_rank"].fillna(base["field_size"])
     base["quali_rank_norm"] = (base["quali_rank"] - 1) / fs1
     base["reached_q3"] = base["reached_q3"].astype(float)
 
