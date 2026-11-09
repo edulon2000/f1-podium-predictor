@@ -115,6 +115,16 @@ same tags as `driver_standings`.
 | `constructors` | constructor_id, name, nationality | KEY / PRE-QUALI | Latest name and nationality |
 | `circuits` | circuit_id, circuit_name, locality, country, lat, long | KEY / PRE-QUALI | |
 
+## OpenF1 tables (2023+, `f1pred-ingest-openf1`)
+
+| Table | Rows | Grain | Tag | Notes |
+|---|---|---|---|---|
+| of1_sessions | 450 | session | KEY | `meeting_key`/`session_key` mapped to `(season, round)`; testing dropped |
+| of1_laps | 100,349 | driver × practice lap | PRE-QUALI | FP1–FP3 only; pit-out laps flagged |
+| of1_stints | 18,265 | driver × practice stint | PRE-QUALI | compound, lap range, tyre age (see gap 12) |
+| of1_grid | 1,835 | driver × race | **PRE-RACE** | official starting grid, published right after qualifying — used when Jolpica's `grid` is still null |
+| of1_weather | 90 | race | POST-RACE | actual race weather (a forecast would be needed to use it as a feature) |
+
 ## What was collected (run of 2026-11-08, 590 API requests)
 
 | Table | Rows | Coverage |
@@ -147,3 +157,6 @@ same tags as `driver_standings`.
 | 9 | Race dates are UTC | Las Vegas `race_date = 2026-11-22`, which is the local Saturday night of Nov 21 | Use `race_start_utc` for ordering, and local time only for display |
 | 10 | No 2014–2022 practice, tyre or weather data | Not in Jolpica. FastF1 now needs an F1 account (see SOURCES.md) | Practice-pace features only exist from 2023 (OpenF1) |
 | 11 | Field size varies (18–22 cars) | 2014–15 had fewer than 20 cars in some races; 2026 has 22 (Cadillac) | Normalise position-based features by field size |
+| 12 | **OpenF1 mixes F2/F3 tyre stints into F1 practice sessions** | 3 sessions, e.g. 2025 R11 FP3 returned stints for 38 car numbers | Only cars with laps in that session are kept; a car whose stint numbers clash (F1 and support car sharing a number) is dropped. Reported as `openf1_foreign_stints` |
+| 13 | OpenF1's per-weekend driver list includes support-series drivers who reuse F1 numbers | e.g. an F2 driver with #1 at 2023 R11 | Drivers are matched by 3-letter code; the car number is only a fallback when a row has no code |
+| 14 | Reserve drivers in FP1 have no race entry | 135 driver-weekends (2023–26) | Their laps are dropped (`openf1_unmapped_driver`); they never race, so no feature is lost |

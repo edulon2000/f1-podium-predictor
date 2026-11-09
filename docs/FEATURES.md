@@ -1,4 +1,8 @@
-# Candidate features and baselines (proposal — not implemented)
+# Features and baselines
+
+> **Status (2026-11-08):** implemented in `src/f1pred/features.py` (column lists `T1_FEATURES`,
+> `T2_FEATURES`) and evaluated in [reports/EVALUATION.md](../reports/EVALUATION.md). Not built yet:
+> #13 weather forecast. Practice pace (#11) uses OpenF1 from 2023 on.
 
 Target, per race: P(driver wins) and P(driver finishes on the podium), for every driver on the
 entry list. Prediction is made at two moments, which define two feature sets:
