@@ -84,11 +84,11 @@ function Results({ rows, stage }: { rows: EvalRow[]; stage: Stage }) {
 }
 
 const STEPS = [
-  ['Data', 'Every race since 2014 from Jolpica-F1 (results, grid, qualifying, standings) and practice laps, tyres and the starting grid from OpenF1 since 2023.'],
-  ['Features', 'Championship position before the race, recent form of driver and team, qualifying pace, reliability, history at the circuit and, after qualifying, the grid. Anything that depends on a race result only enters the following races.'],
+  ['Data', 'Every race since 2014 from Jolpica-F1 (results, grid, qualifying, standings), practice laps, tyres and the starting grid from OpenF1 since 2023, and race weather from Open-Meteo (measured since 2014, forecasts since 2024).'],
+  ['Features', 'Championship position, recent form of driver and team, qualifying pace, reliability, history at the track, the rain forecast and each driver’s record in the rain and on street circuits, rating systems like those used in chess and, after qualifying, the grid. Anything that depends on a race result only enters the following races.'],
   ['Leakage tests', "Automated tests scramble a race's result and check its own features don't move, and that features built before a race match those built after it."],
   ['Validation', 'Walk-forward: each race is predicted by a model trained only on earlier races. Settings were chosen on 2023–24, then checked once on 2025–26.'],
-  ['2026 weighting', 'The 2026 cars follow new rules, so how much races from the current rules era weigh in training is tuned. It helped after qualifying (×3) but not before it (×1).'],
+  ['2026 weighting', 'The 2026 cars follow new rules, so how much races from the current rules era weigh in training is tuned. On the 2023–24 tuning races the current models did best with equal weights, so older races count as much as recent ones.'],
   ['Publishing', 'Predictions are generated and committed to the public repository before the start, then scored against the result.'],
 ]
 

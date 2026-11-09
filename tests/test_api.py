@@ -64,6 +64,7 @@ def test_unknown_api_route_is_404_not_spa(client):
 def test_spa_fallback_serves_index(client):
     r = client.get("/history")
     assert r.status_code == 200 and "spa" in r.text
+    assert r.headers["cache-control"] == "no-cache"
 
 
 def test_path_traversal_blocked(client):

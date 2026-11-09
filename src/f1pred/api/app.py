@@ -197,4 +197,6 @@ def spa(path: str) -> FileResponse:
     index = dist / "index.html"
     if not index.exists():
         raise HTTPException(status_code=404, detail="frontend not built (npm run build)")
-    return FileResponse(index)
+    # index.html must never be cached, or visitors keep an old build after a deploy;
+    # the hashed files under /assets are safe to cache.
+    return FileResponse(index, headers={"Cache-Control": "no-cache"})
