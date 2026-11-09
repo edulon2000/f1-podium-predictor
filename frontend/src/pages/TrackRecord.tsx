@@ -91,10 +91,10 @@ function Backtest({ drivers, races }: { drivers: Drivers; races: Race[] }) {
         const hits = all.filter((r) => r.predicted === r.actual).length
         const pole = all.filter((r) => r.pole_won).length
         const podium = all.reduce((s, r) => s + r.predicted_podium.filter((d) => r.actual_podium.includes(d)).length, 0)
-        const top3 = all.filter((r) => r.actual && r.predicted_podium.includes(r.actual)).length
+        const top3 = all.filter((r) => r.actual && (r.top3 ?? r.predicted_podium).includes(r.actual)).length
         const stats: [string, string, string][] = [
           [`${hits} of ${all.length}`, 'Winners we called', EXPLAIN.pickedWinner],
-          [`${top3} of ${all.length}`, 'Winner among our top 3', 'Races where the winner was one of the three drivers we rated most likely to finish on the podium.'],
+          [`${top3} of ${all.length}`, 'Winner among our top 3', EXPLAIN.winnerTop3],
           [`${pole} of ${all.length}`, 'Won from pole', 'The simple rule we compare against: the driver starting first wins.'],
           [`${podium} of ${all.length * 3}`, 'Podium places we guessed', EXPLAIN.podiumGuessed],
         ]

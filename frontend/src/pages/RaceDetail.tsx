@@ -18,28 +18,32 @@ const retired = (d: DriverDetail) => !!d.status && !d.status.startsWith('Finishe
 
 function WeatherChips({ w }: { w: Detail['weather'] }) {
   if (!w) return null
-  const chips: string[] = []
-  const rain = w.rain_during_race ?? w.rainfall_any
-  if (rain !== undefined && rain !== null) chips.push(rain ? 'Rain during the race' : 'Dry race')
-  const air = w.air_temp_c ?? w.air_temp_mean
-  const track = w.track_temp_c ?? w.track_temp_mean
-  if (typeof air === 'number') chips.push(`Air ${Math.round(air)}°C`)
-  if (typeof track === 'number') chips.push(`Track ${Math.round(track)}°C`)
-  if (typeof w.humidity_mean === 'number') chips.push(`Humidity ${Math.round(w.humidity_mean)}%`)
+  const num = (v: unknown) => (typeof v === 'number' ? v : null)
+  const rain = w.wet_race ?? w.rainfall_any
+  const chips: { text: string; strong?: boolean }[] = []
+  if (rain !== undefined && rain !== null) chips.push({ text: rain ? 'Rain during the race' : 'Dry race', strong: !!rain })
+  const mm = num(w.actual_rain_mm)
+  if (mm !== null && mm > 0) chips.push({ text: `${mm.toFixed(1)} mm of rain` })
+  const air = num(w.actual_temp_c) ?? num(w.air_temp_mean)
+  if (air !== null) chips.push({ text: `Air ${Math.round(air)}°C` })
+  const track = num(w.track_temp_mean)
+  if (track !== null) chips.push({ text: `Track ${Math.round(track)}°C` })
+  const fc = num(w.fc_d1_rain_mm) ?? num(w.fc_live_rain_mm)
+  if (fc !== null) chips.push({ text: `Forecast the day before: ${fc.toFixed(1)} mm` })
   if (!chips.length) return null
   return (
     <div className="flex flex-wrap items-center justify-center gap-2">
-      {chips.map((c, i) => (
+      {chips.map((c) => (
         <span
-          key={c}
+          key={c.text}
           className={`rounded-full px-3 py-1 font-mono text-[0.7rem] tracking-[0.06em] uppercase ${
-            i === 0 && rain ? 'bg-night text-sun' : 'border border-rule bg-paper'
+            c.strong ? 'bg-night text-sun' : 'border border-rule bg-paper'
           }`}
         >
-          {c}
+          {c.text}
         </span>
       ))}
-      <Tip text="Weather measured during the race. It explains what happened; the forecast used for predictions comes from before the race." />
+      <Tip text="What the weather did during the race (measured), and what the forecast said the day before. Only the forecast is used to predict; the measured weather teaches the model how each driver copes with rain." />
     </div>
   )
 }

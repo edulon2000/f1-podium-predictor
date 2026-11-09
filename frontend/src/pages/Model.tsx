@@ -7,12 +7,15 @@ import { EXPLAIN, Tip } from '@/components/Tip'
 const MODEL_LABEL: Record<string, string> = {
   logreg: 'Logistic regression',
   lgbm: 'Gradient boosting (LightGBM)',
+  rank: 'Ranking model (LightGBM)',
   'B1 pole wins': 'Pole-sitter wins',
   'B1p P(win | grid)': 'Pole-sitter, calibrated by grid slot',
   'B2 leader wins': 'Championship leader wins',
   'B2p P(win | standings)': 'Leader, calibrated by standings',
 }
 const label = (m: string) => MODEL_LABEL[m] ?? m
+const rowLabel = (r: EvalRow) =>
+  r.role === 'chosen' ? `${label(r.model)} — current` : r.role === 'best base' ? `${label(r.model)} — previous version` : label(r.model)
 const isBaseline = (m: string) => m.startsWith('B')
 // All-or-nothing baselines (100% on one driver): log-loss is not meaningful for them.
 const isDeterministic = (m: string) => isBaseline(m) && !m.startsWith('B1p') && !m.startsWith('B2p')
@@ -31,11 +34,12 @@ function Results({ rows, stage }: { rows: EvalRow[]; stage: Stage }) {
               <Tip text={EXPLAIN.holdout}>{w.replace('holdout', 'Test on')} · {ws[0]?.races} races</Tip>
             </p>
             <div className="overflow-x-auto">
-              <table className="w-full min-w-[560px] border-collapse">
+              <table className="w-full min-w-[680px] border-collapse">
                 <thead>
                   <tr className="label border-b border-night">
                     <th className="py-2 text-left font-medium"><Tip text={EXPLAIN.baseline}>Method</Tip></th>
-                    <th className="w-[35%] py-2 text-left font-medium"><Tip text={EXPLAIN.pickedWinner}>Picked the winner</Tip></th>
+                    <th className="w-[30%] py-2 text-left font-medium"><Tip text={EXPLAIN.pickedWinner}>Picked the winner</Tip></th>
+                    <th className="py-2 text-right font-medium"><Tip text={EXPLAIN.winnerTop3} align="right">Winner in our top 3</Tip></th>
                     <th className="py-2 text-right font-medium"><Tip text={EXPLAIN.podiumGuessed} align="right">Podium places guessed</Tip></th>
                     <th className="py-2 text-right font-medium"><Tip text={EXPLAIN.confidenceScore} align="right">Confidence score</Tip></th>
                   </tr>
@@ -44,8 +48,8 @@ function Results({ rows, stage }: { rows: EvalRow[]; stage: Stage }) {
                   {ws.map((r) => {
                     const base = isBaseline(r.model)
                     return (
-                      <tr key={r.model} className={`border-b border-rule transition-colors duration-[320ms] hover:bg-sun ${base ? '' : 'bg-sun/30'}`}>
-                        <td className={`py-2.5 ${base ? 'text-earth' : 'narrow text-2xl font-extrabold uppercase'}`}>{label(r.model)}</td>
+                      <tr key={`${r.role ?? ''}-${r.model}`} className={`border-b border-rule transition-colors duration-[320ms] hover:bg-sun ${base ? '' : 'bg-sun/30'}`}>
+                        <td className={`py-2.5 ${base ? 'text-earth' : 'narrow text-2xl font-extrabold uppercase'}`}>{rowLabel(r)}</td>
                         <td className="py-2">
                           <div className="flex items-center gap-3">
                             <div className="h-2 w-full rounded-full bg-paper">
@@ -57,6 +61,7 @@ function Results({ rows, stage }: { rows: EvalRow[]; stage: Stage }) {
                             <span className="w-12 text-right font-mono tabular">{pct(r.winner_acc, 0)}</span>
                           </div>
                         </td>
+                        <td className="py-2 text-right font-mono tabular">{r.winner_top3 === undefined ? '—' : pct(r.winner_top3, 0)}</td>
                         <td className="py-2 text-right font-mono tabular">{pct(r.podium_hit, 0)}</td>
                         <td className="py-2 text-right font-mono tabular">
                           {isDeterministic(r.model) ? <span className="text-earth">{r.logloss_win.toFixed(2)}*</span> : r.logloss_win.toFixed(2)}

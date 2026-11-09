@@ -75,6 +75,7 @@ export interface BacktestRow {
   actual: string | null
   p_actual: number | null
   predicted_podium: string[]
+  top3?: string[]
   actual_podium: string[]
   pole_won: boolean
 }
@@ -84,6 +85,9 @@ export interface EvalRow {
   window: string
   model: string
   winner_acc: number
+  winner_top3?: number
+  role?: 'chosen' | 'best base' | 'baseline'
+  feature_set?: string
   podium_hit: number
   logloss_win: number
   brier_win: number

@@ -70,6 +70,7 @@ export const EXPLAIN = {
     'The chance the model had given to the driver who actually won. High is good: even when the favourite loses, a good forecast still gives the real winner a decent chance.',
   podiumGuessed: 'Of the three drivers the model expected on the podium, how many really finished there.',
   pickedWinner: 'Share of races where the model’s favourite won.',
+  winnerTop3: 'Share of races where the winner was one of the three drivers the model rated most likely to win.',
   confidenceScore:
     'Log-loss: measures how much chance the model gave to the real winner, on average. Lower is better. 0.69 ≈ 50% to the winner, 1.2 ≈ 30%, 2.3 ≈ 10%.',
   holdout:
