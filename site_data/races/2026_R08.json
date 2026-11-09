@@ -8,6 +8,18 @@
   "race_start_utc": "2026-06-28T13:00:00+00:00",
   "is_sprint_weekend": false,
   "weather": {
+    "actual_rain_mm": 0.2,
+    "actual_temp_c": 32.2,
+    "actual_wind_kmh": 7.8,
+    "fc_d1_rain_mm": 0.0,
+    "fc_d2_rain_mm": 0.3,
+    "fc_d1_temp_c": 34.03,
+    "fc_d2_temp_c": 32.83,
+    "fc_live_rain_mm": null,
+    "fc_live_rain_prob": null,
+    "fc_live_temp_c": null,
+    "fc_live_fetched_at": null,
+    "wet_race": false,
     "air_temp_mean": 34.47,
     "track_temp_mean": 50.16,
     "humidity_mean": 29.8,
@@ -32,11 +44,11 @@
       "quali_gap_pct": 0.0,
       "practice_best_gap_pct": 0.0,
       "practice_longrun_gap_pct": 0.193,
-      "t1_p_win": 0.2123,
-      "t1_p_podium": 0.5666,
+      "t1_p_win": 0.2351,
+      "t1_p_podium": 0.5865,
       "t1_rank": 2,
-      "t2_p_win": 0.5515,
-      "t2_p_podium": 0.7629,
+      "t2_p_win": 0.412,
+      "t2_p_podium": 0.935,
       "t2_rank": 1
     },
     {
@@ -54,11 +66,11 @@
       "quali_gap_pct": 0.548,
       "practice_best_gap_pct": 0.407,
       "practice_longrun_gap_pct": 1.98,
-      "t1_p_win": 0.0656,
-      "t1_p_podium": 0.2515,
-      "t1_rank": 7,
-      "t2_p_win": 0.0099,
-      "t2_p_podium": 0.234,
+      "t1_p_win": 0.0787,
+      "t1_p_podium": 0.2597,
+      "t1_rank": 4,
+      "t2_p_win": 0.0103,
+      "t2_p_podium": 0.0582,
       "t2_rank": 5
     },
     {
@@ -76,11 +88,11 @@
       "quali_gap_pct": 0.455,
       "practice_best_gap_pct": 0.0,
       "practice_longrun_gap_pct": 2.054,
-      "t1_p_win": 0.3701,
-      "t1_p_podium": 0.5651,
+      "t1_p_win": 0.3789,
+      "t1_p_podium": 0.5687,
       "t1_rank": 1,
-      "t2_p_win": 0.1158,
-      "t2_p_podium": 0.4367,
+      "t2_p_win": 0.1361,
+      "t2_p_podium": 0.6632,
       "t2_rank": 3
     },
     {
@@ -98,11 +110,11 @@
       "quali_gap_pct": 0.602,
       "practice_best_gap_pct": 0.173,
       "practice_longrun_gap_pct": 0.852,
-      "t1_p_win": 0.0708,
-      "t1_p_podium": 0.3464,
-      "t1_rank": 4,
-      "t2_p_win": 0.0085,
-      "t2_p_podium": 0.1482,
+      "t1_p_win": 0.0811,
+      "t1_p_podium": 0.3591,
+      "t1_rank": 3,
+      "t2_p_win": 0.0054,
+      "t2_p_podium": 0.031,
       "t2_rank": 6
     },
     {
@@ -120,11 +132,11 @@
       "quali_gap_pct": 0.446,
       "practice_best_gap_pct": 0.171,
       "practice_longrun_gap_pct": 0.309,
-      "t1_p_win": 0.1058,
-      "t1_p_podium": 0.3657,
-      "t1_rank": 3,
-      "t2_p_win": 0.23,
-      "t2_p_podium": 0.5975,
+      "t1_p_win": 0.0522,
+      "t1_p_podium": 0.2955,
+      "t1_rank": 7,
+      "t2_p_win": 0.3614,
+      "t2_p_podium": 0.9142,
       "t2_rank": 2
     },
     {
@@ -142,11 +154,11 @@
       "quali_gap_pct": 0.785,
       "practice_best_gap_pct": 1.11,
       "practice_longrun_gap_pct": 1.151,
-      "t1_p_win": 0.0196,
-      "t1_p_podium": 0.1339,
+      "t1_p_win": 0.0231,
+      "t1_p_podium": 0.1527,
       "t1_rank": 8,
-      "t2_p_win": 0.0056,
-      "t2_p_podium": 0.0409,
+      "t2_p_win": 0.0011,
+      "t2_p_podium": 0.0062,
       "t2_rank": 8
     },
     {
@@ -164,11 +176,11 @@
       "quali_gap_pct": 0.588,
       "practice_best_gap_pct": 0.393,
       "practice_longrun_gap_pct": 1.163,
-      "t1_p_win": 0.0674,
-      "t1_p_podium": 0.333,
-      "t1_rank": 6,
-      "t2_p_win": 0.008,
-      "t2_p_podium": 0.1543,
+      "t1_p_win": 0.0754,
+      "t1_p_podium": 0.3533,
+      "t1_rank": 5,
+      "t2_p_win": 0.0053,
+      "t2_p_podium": 0.03,
       "t2_rank": 7
     },
     {
@@ -186,11 +198,11 @@
       "quali_gap_pct": 0.357,
       "practice_best_gap_pct": 0.531,
       "practice_longrun_gap_pct": 0.852,
-      "t1_p_win": 0.0678,
-      "t1_p_podium": 0.3198,
-      "t1_rank": 5,
-      "t2_p_win": 0.0599,
-      "t2_p_podium": 0.5658,
+      "t1_p_win": 0.0603,
+      "t1_p_podium": 0.3154,
+      "t1_rank": 6,
+      "t2_p_win": 0.0677,
+      "t2_p_podium": 0.358,
       "t2_rank": 4
     },
     {
@@ -208,12 +220,12 @@
       "quali_gap_pct": 1.274,
       "practice_best_gap_pct": 1.394,
       "practice_longrun_gap_pct": 2.7,
-      "t1_p_win": 0.005,
-      "t1_p_podium": 0.0334,
+      "t1_p_win": 0.0038,
+      "t1_p_podium": 0.0307,
       "t1_rank": 9,
-      "t2_p_win": 0.0013,
-      "t2_p_podium": 0.0129,
-      "t2_rank": 10
+      "t2_p_win": 0.0002,
+      "t2_p_podium": 0.0005,
+      "t2_rank": 9
     },
     {
       "driver_id": "arvid_lindblad",
@@ -230,12 +242,12 @@
       "quali_gap_pct": 1.352,
       "practice_best_gap_pct": 1.372,
       "practice_longrun_gap_pct": 2.395,
-      "t1_p_win": 0.0029,
-      "t1_p_podium": 0.0204,
-      "t1_rank": 11,
-      "t2_p_win": 0.0014,
-      "t2_p_podium": 0.0096,
-      "t2_rank": 9
+      "t1_p_win": 0.0027,
+      "t1_p_podium": 0.02,
+      "t1_rank": 10,
+      "t2_p_win": 0.0002,
+      "t2_p_podium": 0.0007,
+      "t2_rank": 10
     },
     {
       "driver_id": "bortoleto",
@@ -252,11 +264,11 @@
       "quali_gap_pct": 1.785,
       "practice_best_gap_pct": 1.811,
       "practice_longrun_gap_pct": 2.398,
-      "t1_p_win": 0.0012,
-      "t1_p_podium": 0.006,
+      "t1_p_win": 0.001,
+      "t1_p_podium": 0.0057,
       "t1_rank": 14,
-      "t2_p_win": 0.0008,
-      "t2_p_podium": 0.003,
+      "t2_p_win": 0.0001,
+      "t2_p_podium": 0.0002,
       "t2_rank": 12
     },
     {
@@ -274,12 +286,12 @@
       "quali_gap_pct": 2.266,
       "practice_best_gap_pct": 1.799,
       "practice_longrun_gap_pct": 4.078,
-      "t1_p_win": 0.0008,
-      "t1_p_podium": 0.0041,
-      "t1_rank": 16,
-      "t2_p_win": 0.0006,
-      "t2_p_podium": 0.0034,
-      "t2_rank": 22
+      "t1_p_win": 0.0004,
+      "t1_p_podium": 0.0031,
+      "t1_rank": 17,
+      "t2_p_win": 0.0,
+      "t2_p_podium": 0.0,
+      "t2_rank": 17
     },
     {
       "driver_id": "gasly",
@@ -296,11 +308,11 @@
       "quali_gap_pct": 1.679,
       "practice_best_gap_pct": 1.635,
       "practice_longrun_gap_pct": 2.679,
-      "t1_p_win": 0.0035,
-      "t1_p_podium": 0.0192,
-      "t1_rank": 10,
-      "t2_p_win": 0.0009,
-      "t2_p_podium": 0.0067,
+      "t1_p_win": 0.0021,
+      "t1_p_podium": 0.0173,
+      "t1_rank": 12,
+      "t2_p_win": 0.0001,
+      "t2_p_podium": 0.0002,
       "t2_rank": 11
     },
     {
@@ -318,11 +330,11 @@
       "quali_gap_pct": 2.133,
       "practice_best_gap_pct": 1.881,
       "practice_longrun_gap_pct": 3.051,
-      "t1_p_win": 0.0022,
-      "t1_p_podium": 0.0109,
-      "t1_rank": 12,
-      "t2_p_win": 0.0007,
-      "t2_p_podium": 0.0037,
+      "t1_p_win": 0.0021,
+      "t1_p_podium": 0.0101,
+      "t1_rank": 11,
+      "t2_p_win": 0.0,
+      "t2_p_podium": 0.0007,
       "t2_rank": 16
     },
     {
@@ -340,12 +352,12 @@
       "quali_gap_pct": 2.694,
       "practice_best_gap_pct": 1.72,
       "practice_longrun_gap_pct": 3.389,
-      "t1_p_win": 0.0018,
-      "t1_p_podium": 0.0103,
+      "t1_p_win": 0.0015,
+      "t1_p_podium": 0.0106,
       "t1_rank": 13,
-      "t2_p_win": 0.0006,
-      "t2_p_podium": 0.004,
-      "t2_rank": 21
+      "t2_p_win": 0.0,
+      "t2_p_podium": 0.0002,
+      "t2_rank": 15
     },
     {
       "driver_id": "ocon",
@@ -362,12 +374,12 @@
       "quali_gap_pct": 2.577,
       "practice_best_gap_pct": 2.401,
       "practice_longrun_gap_pct": 4.217,
-      "t1_p_win": 0.0008,
-      "t1_p_podium": 0.004,
-      "t1_rank": 17,
-      "t2_p_win": 0.0006,
-      "t2_p_podium": 0.0025,
-      "t2_rank": 18
+      "t1_p_win": 0.0004,
+      "t1_p_podium": 0.0032,
+      "t1_rank": 16,
+      "t2_p_win": 0.0,
+      "t2_p_podium": 0.0,
+      "t2_rank": 20
     },
     {
       "driver_id": "albon",
@@ -384,12 +396,12 @@
       "quali_gap_pct": 3.624,
       "practice_best_gap_pct": 2.722,
       "practice_longrun_gap_pct": 4.011,
-      "t1_p_win": 0.0006,
-      "t1_p_podium": 0.003,
+      "t1_p_win": 0.0004,
+      "t1_p_podium": 0.0026,
       "t1_rank": 18,
-      "t2_p_win": 0.0006,
-      "t2_p_podium": 0.0026,
-      "t2_rank": 17
+      "t2_p_win": 0.0,
+      "t2_p_podium": 0.0,
+      "t2_rank": 21
     },
     {
       "driver_id": "alonso",
@@ -406,12 +418,12 @@
       "quali_gap_pct": 5.792,
       "practice_best_gap_pct": 4.956,
       "practice_longrun_gap_pct": 6.248,
-      "t1_p_win": 0.0002,
-      "t1_p_podium": 0.0006,
+      "t1_p_win": 0.0001,
+      "t1_p_podium": 0.0005,
       "t1_rank": 19,
-      "t2_p_win": 0.0007,
-      "t2_p_podium": 0.002,
-      "t2_rank": 14
+      "t2_p_win": 0.0,
+      "t2_p_podium": 0.0002,
+      "t2_rank": 18
     },
     {
       "driver_id": "stroll",
@@ -431,9 +443,9 @@
       "t1_p_win": 0.0001,
       "t1_p_podium": 0.0003,
       "t1_rank": 21,
-      "t2_p_win": 0.0006,
-      "t2_p_podium": 0.0021,
-      "t2_rank": 19
+      "t2_p_win": 0.0,
+      "t2_p_podium": 0.0,
+      "t2_rank": 22
     },
     {
       "driver_id": "sainz",
@@ -450,11 +462,11 @@
       "quali_gap_pct": 3.235,
       "practice_best_gap_pct": 2.604,
       "practice_longrun_gap_pct": 5.935,
-      "t1_p_win": 0.0011,
-      "t1_p_podium": 0.0052,
+      "t1_p_win": 0.0007,
+      "t1_p_podium": 0.0046,
       "t1_rank": 15,
-      "t2_p_win": 0.0007,
-      "t2_p_podium": 0.0033,
+      "t2_p_win": 0.0,
+      "t2_p_podium": 0.0007,
       "t2_rank": 13
     },
     {
@@ -472,12 +484,12 @@
       "quali_gap_pct": 4.284,
       "practice_best_gap_pct": 3.631,
       "practice_longrun_gap_pct": 5.647,
-      "t1_p_win": 0.0002,
+      "t1_p_win": 0.0001,
       "t1_p_podium": 0.0004,
       "t1_rank": 20,
-      "t2_p_win": 0.0006,
-      "t2_p_podium": 0.002,
-      "t2_rank": 20
+      "t2_p_win": 0.0,
+      "t2_p_podium": 0.0,
+      "t2_rank": 14
     },
     {
       "driver_id": "bottas",
@@ -494,12 +506,12 @@
       "quali_gap_pct": 4.412,
       "practice_best_gap_pct": 2.544,
       "practice_longrun_gap_pct": 4.564,
-      "t1_p_win": 0.0001,
+      "t1_p_win": 0.0,
       "t1_p_podium": 0.0003,
       "t1_rank": 22,
-      "t2_p_win": 0.0007,
-      "t2_p_podium": 0.002,
-      "t2_rank": 15
+      "t2_p_win": 0.0,
+      "t2_p_podium": 0.0002,
+      "t2_rank": 19
     }
   ],
   "stages": {
@@ -517,66 +529,66 @@
         {
           "feature": "cs_pts_share",
           "label": "Team points compared with the leading team",
-          "effect": 0.5
-        },
-        {
-          "feature": "drv_points_ewm5",
-          "label": "Points scored recently",
-          "effect": 0.456
+          "effect": 0.501
         },
         {
           "feature": "ds_pts_share",
           "label": "Points compared with the championship leader",
-          "effect": 0.455
+          "effect": 0.441
+        },
+        {
+          "feature": "drv_points_ewm5",
+          "label": "Points scored recently",
+          "effect": 0.406
         },
         {
           "feature": "drv_age",
           "label": "Age",
-          "effect": 0.291
+          "effect": 0.382
         },
         {
-          "feature": "drv_quali_gap_ewm5",
-          "label": "Recent qualifying pace",
-          "effect": 0.288
+          "feature": "team_quali_gap_ewm5",
+          "label": "Team's recent qualifying pace",
+          "effect": 0.267
         }
       ],
       "winner_reasons": [
         {
           "feature": "fp_longrun_gap_pct",
           "label": "Race pace in practice (long runs)",
-          "effect": 0.542
+          "effect": 0.572
         },
         {
           "feature": "cs_pts_share",
           "label": "Team points compared with the leading team",
-          "effect": 0.5
+          "effect": 0.501
+        },
+        {
+          "feature": "elo_drv_rel",
+          "label": "Driver rating (built from all past results)",
+          "effect": 0.31
         },
         {
           "feature": "drv_quali_gap_ewm5",
           "label": "Recent qualifying pace",
-          "effect": 0.351
-        },
-        {
-          "feature": "drv_grid_ewm5",
-          "label": "Recent starting positions",
-          "effect": 0.331
+          "effect": 0.283
         },
         {
           "feature": "drv_points_ewm5",
           "label": "Points scored recently",
-          "effect": 0.306
+          "effect": 0.272
         }
       ]
     },
     "t2": {
       "model": {
-        "kind": "lgbm",
+        "kind": "rank",
         "params": {
           "n_estimators": 200,
           "num_leaves": 7,
-          "min_child_samples": 60
+          "min_child_samples": 40
         },
-        "same_era_weight": 3.0
+        "same_era_weight": 1.0
       },
       "train_races": 259,
       "favourite": "russell",
@@ -584,27 +596,27 @@
         {
           "feature": "grid_norm",
           "label": "Starting position",
-          "effect": 1.673
+          "effect": 1.101
         },
         {
           "feature": "quali_rank_norm",
           "label": "Qualifying position",
-          "effect": 0.968
+          "effect": 1.055
         },
         {
           "feature": "quali_gap_pct",
           "label": "Gap to pole in qualifying",
-          "effect": 0.718
-        },
-        {
-          "feature": "drv_finish_ewm3",
-          "label": "Recent finishing positions (last few races)",
-          "effect": 0.442
+          "effect": 0.396
         },
         {
           "feature": "drv_quali_gap_ewm5",
           "label": "Recent qualifying pace",
-          "effect": 0.412
+          "effect": 0.332
+        },
+        {
+          "feature": "drv_finish_ewm3",
+          "label": "Recent finishing positions (last few races)",
+          "effect": 0.3
         }
       ],
       "winner_reasons": null
