@@ -45,6 +45,22 @@ T2_ONLY = [
 ]
 T2_FEATURES = T1_FEATURES + T2_ONLY
 
+# Phase 3 additions: race conditions, how each driver copes with them, and Elo-style ratings.
+# The weather forecast differs by stage: 2 days ahead before qualifying, 1 day ahead after.
+CONDITION_COMMON = [
+    "drv_wet_skill", "team_wet_skill", "drv_gain_ewm", "is_street", "drv_street_x",
+    "elo_drv_rel", "elo_team_rel", "elo_qual_rel",
+]
+T1_EXTRA = CONDITION_COMMON + ["wx_rain_d2", "wx_temp_d2", "wet_prob_d2", "drv_wet_x_d2",
+                               "team_wet_x_d2"]
+T2_EXTRA = CONDITION_COMMON + ["wx_rain_d1", "wx_temp_d1", "wet_prob_d1", "drv_wet_x_d1",
+                               "team_wet_x_d1"]
+T1_FEATURES_PLUS = T1_FEATURES + T1_EXTRA
+T2_FEATURES_PLUS = T2_FEATURES + T2_EXTRA
+
+STREET_CIRCUITS = {"monaco", "baku", "marina_bay", "jeddah", "vegas", "miami", "madring",
+                   "albert_park", "villeneuve", "sochi"}
+
 
 def era_of(season: pd.Series | int):
     s = pd.Series(season) if not isinstance(season, pd.Series) else season
@@ -231,6 +247,10 @@ def build_features(
     # ---- practice pace (OpenF1, 2023+) ----
     base = _practice_features(base, t)
 
+    # ---- race conditions, driver skills in those conditions, ratings (Phase 3) ----
+    base = _condition_features(base, t)
+    base = _elo_features(base)
+
     return base
 
 
@@ -300,4 +320,131 @@ def _practice_features(base: pd.DataFrame, t: dict) -> pd.DataFrame:
     base = base.merge(fp_long.reset_index(), on=KEYS, how="left") if len(fp_long) else \
         base.assign(fp_longrun_gap_pct=np.nan)
     base["has_practice"] = base["fp_best_gap_pct"].notna().astype(float)
+    return base
+
+
+def _shrunk_lag_mean(df: pd.DataFrame, by: str, value: pd.Series, mask: pd.Series,
+                     k: float) -> pd.Series:
+    """Mean of `value` over a group's *earlier* rows where `mask` is true, shrunk toward 0 by k
+    pseudo-rows (so a driver with 1 wet race is not called a rain master). df must be sorted
+    chronologically."""
+    v = (value.fillna(0) * mask).astype(float)
+    n = mask.astype(float)
+    # Aggregate per (group, race) first, so a teammate's result in the *same* race never counts.
+    frame = pd.DataFrame({"g": df[by], "r": df["race_idx"], "v": v, "n": n})
+    per_race = frame.groupby(["g", "r"], sort=True)[["v", "n"]].sum()
+    before = per_race.groupby(level="g").cumsum() - per_race  # strictly earlier races
+    key = pd.MultiIndex.from_arrays([df[by], df["race_idx"]])
+    cs = before["v"].reindex(key).to_numpy()
+    cn = before["n"].reindex(key).to_numpy()
+    return pd.Series(cs / (cn + k), index=df.index)
+
+
+def _condition_features(base: pd.DataFrame, t: dict) -> pd.DataFrame:
+    """Weather forecast for the race + how each driver/team performs in rain and on street tracks.
+
+    Skills are built only from *earlier* races (cumulative sums minus the current row), using the
+    measured weather of those races; the race being predicted contributes only its forecast.
+    """
+    w = t.get("weather")
+    if w is not None and len(w):
+        cols = [c for c in w.columns if c != "fc_live_fetched_at"]
+        base = base.merge(w[cols], on=["season", "round"], how="left")
+    else:
+        for c in ("fc_d1_rain_mm", "fc_d2_rain_mm", "fc_d1_temp_c", "fc_d2_temp_c",
+                  "fc_live_rain_mm", "fc_live_temp_c", "actual_rain_mm", "actual_temp_c"):
+            base[c] = np.nan
+        base["wet_race"] = pd.NA
+    base = base.sort_values(["race_idx", "driver_id"]).reset_index(drop=True)
+
+    for d in ("d1", "d2"):
+        base[f"wx_rain_{d}"] = (base[f"fc_{d}_rain_mm"].fillna(base["fc_live_rain_mm"])
+                                .fillna(base["actual_rain_mm"]))
+        base[f"wx_temp_{d}"] = (base[f"fc_{d}_temp_c"].fillna(base["fc_live_temp_c"])
+                                .fillna(base["actual_temp_c"]))
+        base[f"wet_prob_{d}"] = base[f"wx_rain_{d}"].clip(0, 1)  # ~1 mm in the window = wet
+
+    finished = base["finish_norm"].notna()
+    wet = base["wet_race"].astype("boolean").fillna(False).astype(bool) & finished
+    dry = finished & ~wet
+    base["gain"] = (base["grid_norm"] - base["finish_norm"]).where(finished)  # + = gained places
+
+    for by, col in (("driver_id", "drv_wet_skill"), ("lineage", "team_wet_skill")):
+        base[col] = (_shrunk_lag_mean(base, by, base["gain"], wet, k=4.0)
+                     - _shrunk_lag_mean(base, by, base["gain"], dry, k=4.0))
+    for d in ("d1", "d2"):
+        rain = base[f"wet_prob_{d}"].fillna(0)
+        base[f"drv_wet_x_{d}"] = base["drv_wet_skill"] * rain
+        base[f"team_wet_x_{d}"] = base["team_wet_skill"] * rain
+
+    base["drv_gain_ewm"] = _lag(base, "driver_id", "gain", "ewm", 8)
+
+    base["is_street"] = base["circuit_id"].isin(STREET_CIRCUITS).astype(float)
+    street = base["is_street"].astype(bool) & finished
+    permanent = ~base["is_street"].astype(bool) & finished
+    good = 1 - base["finish_norm"]  # 1 = won, 0 = last
+    base["drv_street_delta"] = (_shrunk_lag_mean(base, "driver_id", good, street, k=4.0)
+                                - _shrunk_lag_mean(base, "driver_id", good, permanent, k=4.0))
+    base["drv_street_x"] = base["drv_street_delta"] * base["is_street"]
+    return base
+
+
+def _elo_features(base: pd.DataFrame, k_drv: float = 20.0, k_team: float = 20.0,
+                  k_qual: float = 16.0) -> pd.DataFrame:
+    """Multi-competitor Elo ratings, taken *before* each race (so no leakage by construction).
+
+    - driver Elo and team (lineage) Elo from finishing order;
+    - qualifying Elo from qualifying order (raw one-lap speed).
+    Team ratings are pulled halfway back to the mean when the technical rules change
+    (2014, 2022, 2026), because a new car resets the pecking order.
+    """
+    drv: dict[str, float] = {}
+    team: dict[str, float] = {}
+    qual: dict[str, float] = {}
+    pre_d = np.full(len(base), np.nan)
+    pre_t = np.full(len(base), np.nan)
+    pre_q = np.full(len(base), np.nan)
+    last_era = None
+    for _idx, g in base.groupby("race_idx", sort=True):
+        era = int(g["era"].iloc[0])
+        if last_era is not None and era != last_era:
+            team = {k: 1500 + 0.5 * (v - 1500) for k, v in team.items()}
+        last_era = era
+        rows = g.index.to_numpy()
+        ids = g["driver_id"].to_numpy()
+        lins = g["lineage"].to_numpy()
+        rd = np.array([drv.get(i, 1450.0) for i in ids])
+        rt = np.array([team.get(i, 1450.0) for i in lins])
+        rq = np.array([qual.get(i, 1450.0) for i in ids])
+        pre_d[rows], pre_t[rows], pre_q[rows] = rd, rt, rq
+
+        def update(ratings: np.ndarray, order: np.ndarray, k: float) -> np.ndarray:
+            ok = ~np.isnan(order)
+            if ok.sum() < 2:
+                return np.zeros_like(ratings)
+            r, o = ratings[ok], order[ok]
+            exp = 1 / (1 + 10 ** ((r[None, :] - r[:, None]) / 400))  # P(i beats j)
+            score = (o[:, None] < o[None, :]).astype(float) + 0.5 * (o[:, None] == o[None, :])
+            np.fill_diagonal(exp, 0)
+            np.fill_diagonal(score, 0)
+            delta = np.zeros_like(ratings)
+            delta[ok] = k / (ok.sum() - 1) * (score - exp).sum(axis=1)
+            return delta
+
+        fin = g["finish_pos"].to_numpy(dtype=float)
+        dd = update(rd, fin, k_drv)
+        dt = update(rt, fin, k_team)
+        dq = update(rq, g["quali_rank"].where(g["best_q_s"].notna()).to_numpy(dtype=float), k_qual)
+        for i, x in zip(ids, rd + dd, strict=True):
+            drv[i] = x
+        for i, x in zip(ids, rq + dq, strict=True):
+            qual[i] = x
+        for lin in set(lins):
+            m = lins == lin
+            team[lin] = float(rt[m][0] + dt[m].mean())
+    base["elo_drv"] = pre_d
+    base["elo_team"] = pre_t
+    base["elo_qual"] = pre_q
+    for c in ("elo_drv", "elo_team", "elo_qual"):
+        base[f"{c}_rel"] = base[c] - base.groupby("race_idx")[c].transform("mean")
     return base

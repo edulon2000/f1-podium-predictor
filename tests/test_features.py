@@ -4,7 +4,9 @@ import numpy as np
 import pandas as pd
 import pytest
 
-from f1pred.features import T1_FEATURES, T2_FEATURES, build_features
+from f1pred.features import T1_FEATURES_PLUS as T1_FEATURES
+from f1pred.features import T2_FEATURES_PLUS as T2_FEATURES
+from f1pred.features import build_features
 
 DRIVERS = ["a", "b", "c", "d", "e", "f"]
 TEAM = {"a": "t1", "b": "t1", "c": "t2", "d": "t2", "e": "t3", "f": "t3"}
@@ -47,7 +49,15 @@ def synthetic(seed=0, seasons=(2025, 2026), rounds=5):
             for i, (tm, p) in enumerate(sorted(team_pts.items(), key=lambda x: -x[1])):
                 cs.append({"season": s, "round": r, "constructor_id": tm, "position": i + 1,
                            "points": p, "wins": 0})
+    wx = pd.DataFrame([{"season": r["season"], "round": r["round"],
+                        "actual_rain_mm": float(rng.choice([0.0, 0.0, 2.0])),
+                        "actual_temp_c": 20.0, "fc_d1_rain_mm": float(rng.random()),
+                        "fc_d2_rain_mm": float(rng.random()), "fc_d1_temp_c": 21.0,
+                        "fc_d2_temp_c": 22.0, "fc_live_rain_mm": np.nan,
+                        "fc_live_temp_c": np.nan} for r in races])
+    wx["wet_race"] = wx["actual_rain_mm"] >= 0.5
     return {
+        "weather": wx,
         "races": pd.DataFrame(races), "results": pd.DataFrame(res),
         "qualifying": pd.DataFrame(q), "driver_standings": pd.DataFrame(ds),
         "constructor_standings": pd.DataFrame(cs),
@@ -68,6 +78,8 @@ def test_outcome_of_race_does_not_leak_into_its_own_features():
     t2["results"].loc[m, "position"] = t2["results"].loc[m, "position"].values[::-1]
     t2["results"].loc[m, "points"] = t2["results"].loc[m, "points"].values[::-1]
     t2["results"].loc[m, "status"] = "Collision"
+    wm = (t2["weather"].season == 2026) & (t2["weather"]["round"] == 3)
+    t2["weather"].loc[wm, ["actual_rain_mm", "wet_race"]] = [9.9, True]  # it "rained" afterwards
     sm = (t2["driver_standings"].season == 2026) & (t2["driver_standings"]["round"] == 3)
     t2["driver_standings"].loc[sm, "points"] = 999.0
     t2["driver_standings"].loc[sm, "position"] = t2["driver_standings"].loc[sm, "position"] \
@@ -89,6 +101,12 @@ def test_target_race_features_equal_features_from_truncated_history():
     keep = {}
     for k, v in t.items():
         if k in ("races", "drivers"):
+            keep[k] = v
+        elif k == "weather":
+            # forecasts exist before the race; what actually happened does not
+            v = v.copy()
+            later = (v.season > target[0]) | ((v.season == target[0]) & (v["round"] >= target[1]))
+            v.loc[later, ["actual_rain_mm", "actual_temp_c", "wet_race"]] = np.nan
             keep[k] = v
         else:
             before = (v.season < target[0]) | ((v.season == target[0]) & (v["round"] < target[1]))
