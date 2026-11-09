@@ -1,64 +1,106 @@
 @import "tailwindcss";
 
 /*
-  Direction: an official timing sheet. Cool white paper, ink, monospace columns.
-  One accent with meaning: "sector purple" marks the model's top pick, the way purple
-  marks the fastest time on a timing screen. Green = prediction confirmed by the result.
+  Design tokens — the single source for colour, type and motion.
+  Palette merges the two references: stone/night/sun/sand/earth (instrument) + teal (confirmation).
+  Meaning is fixed: sun = the model's pick, teal = confirmed by the result, sand = podium.
+  Motion: one curve and one duration everywhere (the same as the focus field's own transition),
+  and one spring for the morphing icons (see src/motion.ts).
 */
 @theme {
-  --color-paper: #f5f7f6;
-  --color-sheet: #ffffff;
-  --color-ink: #14181f;
-  --color-muted: #5d6673;
-  --color-rule: #d9dee3;
-  --color-stripe: #eef1f3;
-  --color-purple: #8e3fd1;
-  --color-purple-soft: #e9dcf7;
-  --color-green: #1f8a4c;
-  --color-amber: #b7791f;
+  --color-stone: #e6e3db;
+  --color-paper: #efede7;
+  --color-night: #0c1018;
+  --color-night-2: #171c26;
+  --color-sun: #f3d27a;
+  --color-sand: #f5c27e;
+  --color-earth: #5b4634;
+  --color-teal: #2ba597;
+  --color-rule: #cfcac0;
+  --color-dash: #a29d90;
 
-  --font-display: "Barlow Condensed", "Arial Narrow", sans-serif;
-  --font-sans: "IBM Plex Sans", system-ui, sans-serif;
+  --font-display: "Archivo", "Arial Narrow", sans-serif;
+  --font-sans: "Instrument Sans", system-ui, sans-serif;
   --font-mono: "IBM Plex Mono", ui-monospace, monospace;
+
+  --ease-spring: cubic-bezier(0.22, 1, 0.36, 1);
+  --duration-base: 320ms;
 }
 
 html {
-  background: var(--color-paper);
-  color: var(--color-ink);
+  background-color: var(--color-stone);
+  color: var(--color-night);
   font-family: var(--font-sans);
   -webkit-font-smoothing: antialiased;
 }
 
+/* Fine paper grain, as in the reference boards. */
+body {
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.9' numOctaves='2' stitchTiles='stitch'/%3E%3CfeColorMatrix values='0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 .05 0'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+}
+
 :focus-visible {
-  outline: 2px solid var(--color-purple);
-  outline-offset: 2px;
+  outline: 2px solid var(--color-night);
+  outline-offset: 3px;
 }
 
-.tabular {
-  font-variant-numeric: tabular-nums;
-}
+/* Archivo is variable on width: wide for headlines, condensed for data rows. */
+.wide { font-family: var(--font-display); font-stretch: 125%; }
+.narrow { font-family: var(--font-display); font-stretch: 72%; }
+.tabular { font-variant-numeric: tabular-nums; }
 
-/* The issue stamp: rubber-stamp look, slightly rotated. */
-.stamp {
-  border: 2px solid currentColor;
-  border-radius: 4px;
-  padding: 0.35rem 0.6rem;
-  transform: rotate(-3deg);
+.label {
   font-family: var(--font-mono);
-  font-size: 0.7rem;
-  letter-spacing: 0.08em;
+  font-size: 0.68rem;
+  letter-spacing: 0.14em;
   text-transform: uppercase;
-  line-height: 1.25;
+  color: var(--color-earth);
 }
 
-@keyframes bar-in {
-  from { transform: scaleX(0); }
-  to { transform: scaleX(1); }
+/* Marker highlight: the sun block paints in behind the text. */
+.mark {
+  background-image: linear-gradient(var(--color-sun), var(--color-sun));
+  background-repeat: no-repeat;
+  background-size: 0% 100%;
+  padding: 0 0.12em;
+  box-decoration-break: clone;
+  -webkit-box-decoration-break: clone;
+  animation: mark-in 900ms var(--ease-spring) 250ms forwards;
 }
-.bar {
-  transform-origin: left;
-  animation: bar-in 700ms cubic-bezier(0.2, 0.7, 0.2, 1) both;
+@keyframes mark-in { to { background-size: 100% 100%; } }
+
+/* Corner brackets around a call to action. */
+.brackets { position: relative; }
+.brackets::before,
+.brackets::after {
+  content: "";
+  position: absolute;
+  inset: -6px;
+  pointer-events: none;
+  border: 1.5px solid var(--color-night);
+  transition: inset var(--duration-base) var(--ease-spring);
+  clip-path: polygon(0 0, 10px 0, 10px 1.5px, 1.5px 1.5px, 1.5px 10px, 0 10px, 0 0,
+    100% 0, 100% 10px, calc(100% - 1.5px) 10px, calc(100% - 1.5px) 1.5px, calc(100% - 10px) 1.5px, calc(100% - 10px) 0, 100% 0);
 }
+.brackets::after { transform: rotate(180deg); }
+.brackets:hover::before,
+.brackets:hover::after { inset: -10px; }
+
+/* Bars and dial segments grow in on load. */
+@keyframes grow-x { from { transform: scaleX(0); } }
+.bar { transform-origin: left; animation: grow-x 700ms var(--ease-spring) both; }
+@keyframes seg-in { from { opacity: 0.15; } }
+.seg { animation: seg-in 500ms var(--ease-spring) both; }
+
+/* Dot matrix strip (decorative footer texture). */
+.dots {
+  background-image: radial-gradient(var(--color-dash) 1px, transparent 1.2px);
+  background-size: 7px 7px;
+  mask-image: linear-gradient(to top, black, transparent);
+}
+
 @media (prefers-reduced-motion: reduce) {
-  .bar { animation: none; }
+  .mark { animation: none; background-size: 100% 100%; }
+  .bar, .seg { animation: none; }
+  .brackets::before, .brackets::after { transition: none; }
 }
