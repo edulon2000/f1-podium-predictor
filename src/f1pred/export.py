@@ -16,10 +16,13 @@ import sys
 from pathlib import Path
 from typing import Any
 
+import numpy as np
 import pandas as pd
 
+from f1pred.cleaning import status_category
 from f1pred.data import load_tables
-from f1pred.evaluate import races_between, walk_forward
+from f1pred.evaluate import normalize
+from f1pred.explain import contributions, top_reasons
 from f1pred.features import build_features
 from f1pred.predict import load_spec, score
 
@@ -110,31 +113,144 @@ def export_scoreboard(t: dict, pred_dir: Path) -> list[dict]:
     return rows
 
 
-def export_backtest(frame: pd.DataFrame, season: int) -> dict:
-    """Retroactive walk-forward predictions for the season (clearly labelled as backtest)."""
-    out: dict[str, list] = {}
-    races = races_between(frame, season, season)
-    if not races:
+STATUS_TEXT = {
+    "finished": "Finished", "lapped": "Finished, lapped", "dnf_mechanical": "Retired (car problem)",
+    "dnf_accident": "Retired (crash or damage)", "dnf_unknown": "Retired", "dns": "Did not start",
+    "dsq": "Disqualified",
+}
+
+
+def _num(v: Any, digits: int = 4) -> float | None:
+    return None if v is None or pd.isna(v) else round(float(v), digits)
+
+
+def _int(v: Any) -> int | None:
+    return None if v is None or pd.isna(v) else int(v)
+
+
+def export_details(t: dict, frame: pd.DataFrame, season: int, pred_dir: Path
+                   ) -> tuple[dict[int, dict], dict[str, list]]:
+    """Per-race detail pages + the backtest summary.
+
+    Every completed race of the season is re-predicted from earlier races only (walk-forward),
+    for both stages, keeping the fitted model so we can also explain each prediction.
+    """
+    drivers = driver_index(t)
+    teams = t["constructors"].set_index("constructor_id")["name"].to_dict()
+    races = t["races"][t["races"].season == season].set_index("round")
+    circuits = t["circuits"].set_index("circuit_id")
+    res = t["results"][t["results"].season == season]
+    weather = t.get("weather", t.get("of1_weather"))
+    specs = {s: load_spec(s, Path("configs")) for s in ("t1", "t2")}
+    hist = frame[frame["win"].notna()]
+    details: dict[int, dict] = {}
+    summary: dict[str, list] = {"t1": [], "t2": []}
+
+    def live_block(rnd: int) -> dict:
+        out = {}
+        for path in sorted(pred_dir.glob(f"{season}_R{rnd:02d}_t*.json")):
+            pj = json.loads(path.read_text(encoding="utf-8"))
+            out[pj["stage"]] = {"generated_at": pj["generated_at"], "model": pj["model"],
+                                "predictions": pj["predictions"]}
         return out
-    for stage in ("t1", "t2"):
-        spec = load_spec(stage, Path("configs"))
-        preds = walk_forward(frame, spec.as_predictor(), races)
+
+    def header(rnd: int) -> dict:
+        r = races.loc[rnd]
+        c = circuits.loc[r.circuit_id] if r.circuit_id in circuits.index else None
+        w = None
+        if weather is not None and len(weather):
+            ww = weather[(weather.season == season) & (weather["round"] == rnd)]
+            if len(ww):
+                x = ww.iloc[0]
+                w = {}
+                for k, v in x.drop(labels=["season", "round"]).items():
+                    if v is None or (not isinstance(v, str) and pd.isna(v)):
+                        w[k] = None
+                    elif isinstance(v, (bool, np.bool_)):
+                        w[k] = bool(v)
+                    elif isinstance(v, (int, float, np.integer, np.floating)):
+                        w[k] = round(float(v), 2)
+                    else:
+                        w[k] = v
+        return {"season": season, "round": int(rnd), "race_name": r.race_name,
+                "circuit_name": None if c is None else c["circuit_name"],
+                "locality": None if c is None else c["locality"],
+                "country": None if c is None else c["country"],
+                "race_start_utc": _ts(r.race_start_utc),
+                "is_sprint_weekend": bool(r.is_sprint_weekend),
+                "weather": w}
+
+    done_rounds = sorted(set(res["round"].astype(int)))
+    for rnd in done_rounds:
+        test = frame[(frame.season == season) & (frame["round"] == rnd)].reset_index(drop=True)
+        idx = test["race_idx"].iloc[0]
+        train = hist[hist["race_idx"] < idx]
+        rr = res[res["round"] == rnd].set_index("driver_id")
         rows = []
-        for (s, r), g in preds.groupby(["season", "round"]):
-            top = g.sort_values("p_win", ascending=False)
-            winner = g[g.win == 1]
+        for _, x in test.iterrows():
+            d = drivers.get(x.driver_id, {})
+            st = rr.loc[x.driver_id, "status"] if x.driver_id in rr.index else None
+            cat = status_category(st) if isinstance(st, str) else ""
             rows.append({
-                "season": int(s), "round": int(r),
-                "predicted": top.driver_id.iloc[0], "p_predicted": round(top.p_win.iloc[0], 4),
+                "driver_id": x.driver_id, "name": d.get("name", x.driver_id), "code": d.get("code"),
+                "constructor_id": x.constructor_id,
+                "team": teams.get(x.constructor_id, x.constructor_id),
+                "grid": _int(x.grid_f), "finish": _int(x.finish_pos),
+                "status": STATUS_TEXT.get(cat, st),
+                "points": _num(x.pts, 1), "quali_position": _int(x.quali_rank),
+                "quali_gap_pct": _num(x.quali_gap_pct, 3),
+                "practice_best_gap_pct": _num(x.fp_best_gap_pct, 3),
+                "practice_longrun_gap_pct": _num(x.fp_longrun_gap_pct, 3),
+            })
+        stages = {}
+        for stage, spec in specs.items():
+            fitted = spec.fit(train, season)
+            pred = spec.predict(fitted, test)
+            pp = pd.concat([test[["season", "round", "driver_id", "win", "podium", "finish_pos",
+                                  "grid_f"]], pred], axis=1)
+            pp["p_win"] = normalize(pp, "p_win", 1.0)
+            pp["p_podium"] = normalize(pp, "p_podium", 3.0)
+            contrib = contributions(spec, fitted, test)
+            fav = int(pp["p_win"].idxmax())
+            win_idx = pp.index[pp["win"] == 1]
+            wi = int(win_idx[0]) if len(win_idx) else None
+            order = pp["p_win"].rank(ascending=False, method="first").astype(int)
+            for i, row in enumerate(rows):
+                row[f"{stage}_p_win"] = _num(pp.loc[i, "p_win"])
+                row[f"{stage}_p_podium"] = _num(pp.loc[i, "p_podium"])
+                row[f"{stage}_rank"] = int(order[i])
+            stages[stage] = {
+                "model": {"kind": spec.kind, "params": spec.params,
+                          "same_era_weight": spec.same_era_weight},
+                "train_races": int(train["race_idx"].nunique()),
+                "favourite": pp.loc[fav, "driver_id"],
+                "favourite_reasons": top_reasons(contrib.loc[fav]),
+                "winner_reasons": None if wi is None or wi == fav else top_reasons(contrib.loc[wi]),
+            }
+            winner = pp[pp.win == 1]
+            summary[stage].append({
+                "season": season, "round": int(rnd),
+                "predicted": pp.loc[fav, "driver_id"], "p_predicted": _num(pp.loc[fav, "p_win"]),
                 "actual": None if winner.empty else winner.driver_id.iloc[0],
-                "p_actual": None if winner.empty else round(winner.p_win.iloc[0], 4),
-                "predicted_podium": list(g.sort_values("p_podium", ascending=False)
+                "p_actual": None if winner.empty else _num(winner.p_win.iloc[0]),
+                "predicted_podium": list(pp.sort_values("p_podium", ascending=False)
                                          .driver_id.head(3)),
-                "actual_podium": list(g[g.podium == 1].sort_values("finish_pos").driver_id),
+                "actual_podium": list(pp[pp.podium == 1].sort_values("finish_pos").driver_id),
                 "pole_won": bool((winner.grid_f == 1).any()),
             })
-        out[stage] = rows
-    return out
+        details[rnd] = {**header(rnd), "status": "done", "kind": "backtest",
+                        "drivers": sorted(rows, key=lambda r: r["finish"] or 99),
+                        "stages": stages, "live": live_block(rnd)}
+        log.info("details %s R%s", season, rnd)
+
+    # upcoming races that already have a live prediction
+    for path in sorted(pred_dir.glob(f"{season}_R*_t*.json")):
+        rnd = int(path.stem.split("_")[1][1:])
+        if rnd in details or rnd not in races.index:
+            continue
+        details[rnd] = {**header(rnd), "status": "upcoming", "kind": "live", "drivers": [],
+                        "stages": {}, "live": live_block(rnd)}
+    return details, summary
 
 
 def main(argv: list[str] | None = None) -> int:
@@ -168,8 +284,10 @@ def main(argv: list[str] | None = None) -> int:
         log.warning("reports/evaluation.json missing — run scripts/run_evaluation.py")
 
     if not args.no_backtest:
-        _write(args.out / f"backtest_{args.season}.json",
-               export_backtest(build_features(t), args.season))
+        details, summary = export_details(t, build_features(t), args.season, args.predictions)
+        _write(args.out / f"backtest_{args.season}.json", summary)
+        for rnd, d in details.items():
+            _write(args.out / "races" / f"{args.season}_R{rnd:02d}.json", d)
 
     done = [r for r in races if r["status"] == "done"]
     _write(args.out / "meta.json", {
