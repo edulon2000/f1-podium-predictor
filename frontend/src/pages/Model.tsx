@@ -6,9 +6,15 @@ import { pct, STAGE_LABEL } from '../format'
 const MODEL_LABEL: Record<string, string> = {
   logreg: 'Logistic regression',
   lgbm: 'Gradient boosting (LightGBM)',
+  'B1 pole wins': 'Pole-sitter wins',
+  'B1p P(win | grid)': 'Pole-sitter, calibrated by grid slot',
+  'B2 leader wins': 'Championship leader wins',
+  'B2p P(win | standings)': 'Leader, calibrated by standings',
 }
 const label = (m: string) => MODEL_LABEL[m] ?? m
 const isBaseline = (m: string) => m.startsWith('B')
+// All-or-nothing baselines (100% on one driver): log-loss is not meaningful for them.
+const isDeterministic = (m: string) => isBaseline(m) && !m.startsWith('B1p') && !m.startsWith('B2p')
 
 function Results({ rows, stage }: { rows: EvalRow[]; stage: Stage }) {
   const sub = rows.filter((r) => r.stage === stage)
@@ -54,7 +60,7 @@ function Results({ rows, stage }: { rows: EvalRow[]; stage: Stage }) {
                         </td>
                         <td className="py-2 text-right font-mono tabular">{pct(r.podium_hit, 0)}</td>
                         <td className="py-2 text-right font-mono tabular">
-                          {r.logloss_win > 2.5 ? <span className="text-muted">{r.logloss_win.toFixed(2)}*</span> : r.logloss_win.toFixed(2)}
+                          {isDeterministic(r.model) ? <span className="text-muted">{r.logloss_win.toFixed(2)}*</span> : r.logloss_win.toFixed(2)}
                         </td>
                       </tr>
                     )
@@ -67,7 +73,7 @@ function Results({ rows, stage }: { rows: EvalRow[]; stage: Stage }) {
       })}
       <p className="font-mono text-[0.7rem] text-muted">
         * All-or-nothing baselines put 100% on one driver, so their log-loss explodes whenever they miss. The calibrated
-        versions (P(win | grid), P(win | standings)) are the fair comparison.
+        versions (win rate by grid slot or by standings position, learned from earlier races) are the fair comparison.
       </p>
     </div>
   )
@@ -78,7 +84,7 @@ const STEPS = [
   ['Features', 'Championship position before the race, recent form of driver and team, qualifying pace, reliability, history at the circuit and, after qualifying, the grid. Anything that depends on a race result only enters the following races.'],
   ['Leakage tests', "Automated tests scramble a race's result and check its own features don't move, and that features built before a race match those built after it."],
   ['Validation', 'Walk-forward: each race is predicted by a model trained only on earlier races. Settings were chosen on 2023–24, then checked once on 2025–26.'],
-  ['2026 weighting', 'The 2026 cars follow new rules, so races from the current rules era weigh more in training than older ones.'],
+  ['2026 weighting', 'The 2026 cars follow new rules, so how much races from the current rules era weigh in training is tuned. It helped after qualifying (×3) but not before it (×1).'],
   ['Publishing', 'Predictions are generated and committed to the public repository before the start, then scored against the result.'],
 ]
 
