@@ -1,5 +1,6 @@
 {
   "kind": "logreg",
+  "feature_set": "plus",
   "params": {
     "C": 0.03
   },

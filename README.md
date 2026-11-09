@@ -15,22 +15,24 @@ where "same era" = 2022+). It helped after qualifying (×3) and not before it (�
 - **Phase 3 — showcase** ✅ FastAPI + React site, Docker image, Render blueprint, CI.
 - **Live record** — predictions are committed to `predictions/` before each race.
 
-## Results so far (holdout 2025–26, 44 races, walk-forward)
+## Results so far (test races 2025–26, 44 races, walk-forward)
 
-| After qualifying (T2) | Winner picked | Podium hit | Log-loss (winner) ↓ |
-|---|---|---|---|
-| **LightGBM** (chosen) | 56.8% | **71.2%** | **1.06** |
-| "Pole-sitter wins" | **68.2%** | 68.2% | 1.18 (calibrated version) |
+| After qualifying | Exact winner | Winner in our top 3 | Podium places | Log-loss ↓ |
+|---|---|---|---|---|
+| **Ranking model + conditions** (current) | 61.4% | 90.9% | 68.2% | **0.976** |
+| Previous model (Phase 2, with the data fix) | 61.4% | 93.2% | 70.4% | 1.055 |
+| “Pole-sitter wins” (calibrated) | **68.2%** | 93.2% | 68.2% | 1.176 |
 
-| Before qualifying (T1) | Winner picked | Podium hit | Log-loss (winner) ↓ |
-|---|---|---|---|
-| **Logistic regression** (chosen) | 27.3% | **61.4%** | **1.77** |
-| "Championship leader wins" | 27.3% | 52.3% | 1.89 (calibrated version) |
+| Before qualifying | Exact winner | Winner in our top 3 | Podium places | Log-loss ↓ |
+|---|---|---|---|---|
+| **Logistic regression + conditions** (current) | 25.0% | 77.3% | 61.4% | **1.763** |
+| “Championship leader wins” (calibrated) | 27.3% | 75.0% | 57.6% | 1.891 |
 
-Honest reading: the model gives **better-calibrated probabilities** and **better podiums** than
-both baselines, but **it does not beat "the pole-sitter wins" at naming the winner** — in 2026
-the pole-sitter won 14 of 20 races, and the model's top pick 13. Before qualifying, the winner
-is hard to call for everyone (~30%). Next ideas are in the Phase 4 list of the evaluation report.
+Honest reading: the model now gives the **best-calibrated probabilities** (log-loss under 1),
+but it still **does not beat “the pole-sitter wins” at naming the exact winner**, and the
+“90% winner in our top 3 before qualifying” target was **not reached** (77%). Weather, rain
+records and Elo ratings were added and leakage-tested but barely moved the test numbers. Full
+breakdown and next ideas: [reports/EVALUATION.md](reports/EVALUATION.md).
 
 ## Setup
 

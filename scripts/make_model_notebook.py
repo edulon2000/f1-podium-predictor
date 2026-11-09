@@ -86,7 +86,7 @@ cells = [
         "    spec = load_spec(stage, Path('configs'))\n"
         "    train = frame[frame['win'].notna()]\n"
         "    fitted = spec.fit(train, 2026)['win']\n"
-        "    if spec.kind == 'lgbm':\n"
+        "    if spec.kind in ('lgbm', 'rank'):\n"
         "        imp = pd.Series(fitted.booster_.feature_importance('gain'), index=spec.features)\n"
         "        return (imp / imp.sum()).sort_values(ascending=False).head(12).rename('gain share')\n"
         "    coefs = fitted.named_steps['logisticregression'].coef_[0][:len(spec.features)]\n"
