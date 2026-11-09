@@ -1,0 +1,7 @@
+{
+  "kind": "logreg",
+  "params": {
+    "C": 0.03
+  },
+  "same_era_weight": 1.0
+}

@@ -1,0 +1,9 @@
+{
+  "kind": "lgbm",
+  "params": {
+    "n_estimators": 200,
+    "num_leaves": 7,
+    "min_child_samples": 60
+  },
+  "same_era_weight": 3.0
+}
