@@ -125,6 +125,23 @@ same tags as `driver_standings`.
 | of1_grid | 1,835 | driver × race | **PRE-RACE** | official starting grid, published right after qualifying — used when Jolpica's `grid` is still null |
 | of1_weather | 90 | race | POST-RACE | actual race weather (a forecast would be needed to use it as a feature) |
 
+## Weather table (`f1pred-ingest-weather`, Open-Meteo)
+
+One row per race (season, round), over the race window at the circuit (start hour + 2 h).
+
+| Column | Source | Tag | Notes |
+|---|---|---|---|
+| actual_rain_mm, actual_temp_c, actual_wind_kmh | archive API (reanalysis), 2014+ | **POST-RACE** | What happened. Used only to label past races as wet/dry and learn each driver's rain record |
+| wet_race | actual_rain_mm ≥ 0.5 mm, or OpenF1's in-session rain sensor (2023+) | POST-RACE | 48 wet races 2014–2026 |
+| fc_d2_rain_mm, fc_d2_temp_c | previous-runs API, **2024+** | PRE-QUALI | Forecast as it stood 2 days before → "before qualifying" features |
+| fc_d1_rain_mm, fc_d1_temp_c | previous-runs API, **2024+** | PRE-RACE | Forecast 1 day before → "after qualifying" features |
+| fc_live_rain_mm, fc_live_rain_prob, fc_live_temp_c | forecast API | PRE-QUALI | Only for races within 15 days (used for live predictions) |
+
+**Gap 15 — no archived forecasts before 2024.** For 2014–2023 the weather features fall back
+to the measured weather as a stand-in for the forecast. Training therefore sees "perfect"
+forecasts for older races; the 2025–26 test uses real forecasts only, so the reported test
+numbers are not inflated by this.
+
 ## What was collected (run of 2026-11-08, 590 API requests)
 
 | Table | Rows | Coverage |

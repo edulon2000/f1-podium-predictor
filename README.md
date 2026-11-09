@@ -44,6 +44,7 @@ uv sync --all-extras
 # 1. refresh data (Jolpica current season + OpenF1 practice/grid)
 uv run f1pred-ingest --from 2014 --to 2026 --refresh-current
 uv run f1pred-ingest-openf1 --from 2023 --to 2026
+uv run f1pred-ingest-weather          # measured weather + forecasts (Open-Meteo)
 
 # 2. after practice: prediction before qualifying (T1)
 uv run f1pred-predict --season 2026 --round 21 --stage t1
@@ -80,6 +81,7 @@ uv run uvicorn f1pred.api.app:app --port 8000     # API + site on http://localho
 | Step | Module | Notes |
 |---|---|---|
 | Ingest Jolpica | `f1pred.ingest` | 500 req/h, runs at 1 req/s (429s appear below the documented 4 req/s); hourly window persisted; finished seasons cached forever; aborts on API/schema errors instead of filling gaps |
+| Ingest weather | `f1pred.weather` | Open-Meteo: measured weather 2014+, forecasts 1–2 days ahead 2024+, live forecast for the next races |
 | Ingest OpenF1 | `f1pred.openf1` | 2023+, 25 req/min (429s at 40/min); practice laps/stints, starting grid, race weather |
 | Clean | `f1pred.cleaning` | status categories, team lineage across rebrands, quali pace from lap times |
 | Features | `f1pred.features` | T1 (pre-quali) / T2 (post-quali); every outcome-derived feature is lagged |

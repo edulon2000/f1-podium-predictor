@@ -81,3 +81,18 @@ Both are evaluated walk-forward on every race in 2014–2026, reported per era a
 - For Las Vegas, Qatar and Abu Dhabi: freeze and commit the T1 prediction on Friday and the T2
   prediction on Saturday, before each race, with a timestamp. That makes the out-of-sample record
   verifiable on the portfolio.
+
+
+## Phase 3 additions (implemented, `T1_FEATURES_PLUS` / `T2_FEATURES_PLUS`)
+
+| Feature | Meaning | Leakage guard |
+|---|---|---|
+| `wx_rain_d2/d1`, `wx_temp_d2/d1`, `wet_prob_d2/d1` | Rain and temperature forecast for the race window, 2 days (T1) or 1 day (T2) before | Forecast only; measured weather never used for the race itself (see DATA_MAP gap 15) |
+| `drv_wet_skill`, `team_wet_skill` | Places gained in past wet races minus places gained in dry ones, shrunk toward 0 | Earlier races only; team version aggregated per race so a teammate's same-race result never counts (a leakage test caught this) |
+| `drv_wet_x_*`, `team_wet_x_*` | Rain record × chance of rain: matters only when rain is forecast | — |
+| `drv_gain_ewm` | Places usually gained from the grid (racecraft) | Lagged |
+| `is_street`, `drv_street_x` | Street circuit and the driver's record on them vs permanent tracks | Lagged |
+| `elo_drv_rel`, `elo_team_rel`, `elo_qual_rel` | Elo ratings from finishing order (driver, car) and qualifying order (one-lap speed), relative to the field; car ratings pulled halfway to the mean at each rules change | Taken before each race |
+
+Model added: LightGBM **learning-to-rank** (lambdarank) with a softmax temperature fitted on
+training races and Plackett–Luce podium probabilities.
