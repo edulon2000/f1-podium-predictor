@@ -20,11 +20,20 @@ import pandas as pd
 
 from f1pred.data import load_tables
 from f1pred.evaluate import metrics, normalize
-from f1pred.features import T1_FEATURES, T2_FEATURES, build_features
+from f1pred.features import (
+    T1_FEATURES,
+    T1_FEATURES_PLUS,
+    T2_FEATURES,
+    T2_FEATURES_PLUS,
+    build_features,
+)
 from f1pred.model import ModelSpec
 
 log = logging.getLogger("f1pred.predict")
-STAGE_FEATURES = {"t1": T1_FEATURES, "t2": T2_FEATURES}
+STAGE_FEATURES = {
+    ("t1", "base"): T1_FEATURES, ("t2", "base"): T2_FEATURES,
+    ("t1", "plus"): T1_FEATURES_PLUS, ("t2", "plus"): T2_FEATURES_PLUS,
+}
 DEFAULT_SPEC = {"kind": "logreg", "params": {"C": 0.1}, "same_era_weight": 3.0}
 
 
@@ -34,7 +43,9 @@ def load_spec(stage: str, config_dir: Path) -> ModelSpec:
     if not path.exists():
         log.warning("%s not found — using default spec %s (run scripts/run_evaluation.py)",
                     path, DEFAULT_SPEC)
-    return ModelSpec(cfg["kind"], STAGE_FEATURES[stage], cfg["same_era_weight"], cfg["params"])
+    fset = cfg.get("feature_set", "base")
+    return ModelSpec(cfg["kind"], STAGE_FEATURES[(stage, fset)], cfg["same_era_weight"],
+                     cfg["params"], feature_set=fset)
 
 
 def predict_race(t: dict, season: int, rnd: int, stage: str, spec: ModelSpec,

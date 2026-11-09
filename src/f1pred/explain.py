@@ -61,6 +61,24 @@ FEATURE_LABELS: dict[str, str] = {
     "teammate_quali_gap_pct": "Qualifying gap to the teammate",
     "pole_x_circuit": "Pole at a track where pole usually wins",
     "sprint_norm": "Sprint result",
+    "drv_wet_skill": "Driver's record in the rain",
+    "team_wet_skill": "Team's record in the rain",
+    "drv_gain_ewm": "Places usually gained during races",
+    "is_street": "Street circuit",
+    "drv_street_x": "Driver's record on street circuits",
+    "elo_drv_rel": "Driver rating (built from all past results)",
+    "elo_team_rel": "Car rating (built from all past results)",
+    "elo_qual_rel": "One-lap speed rating",
+    "wx_rain_d2": "Rain forecast (2 days before)",
+    "wx_rain_d1": "Rain forecast (1 day before)",
+    "wx_temp_d2": "Temperature forecast (2 days before)",
+    "wx_temp_d1": "Temperature forecast (1 day before)",
+    "wet_prob_d2": "Chance of a wet race (2 days before)",
+    "wet_prob_d1": "Chance of a wet race (1 day before)",
+    "drv_wet_x_d2": "Driver's rain record × rain forecast",
+    "drv_wet_x_d1": "Driver's rain record × rain forecast",
+    "team_wet_x_d2": "Team's rain record × rain forecast",
+    "team_wet_x_d1": "Team's rain record × rain forecast",
 }
 
 
@@ -72,7 +90,7 @@ def contributions(spec: ModelSpec, fitted: dict, test: pd.DataFrame) -> pd.DataF
     """Per-driver, per-feature contribution to the *win* model (log-odds), centred on the race."""
     X = test[spec.features].astype(float)
     model = fitted["win"]
-    if spec.kind == "lgbm":
+    if spec.kind in ("lgbm", "rank"):
         raw = model.booster_.predict(X, pred_contrib=True)[:, : len(spec.features)]
     else:
         pre, lr = model[:-1], model[-1]

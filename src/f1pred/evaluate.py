@@ -63,6 +63,8 @@ def metrics(preds: pd.DataFrame) -> dict[str, float]:
         pp = np.clip(g["p_podium"].to_numpy(), EPS, 1 - EPS)
         rows.append({
             "winner_acc": float(top1["driver_id"] == winner["driver_id"]),
+            "winner_top3": float(winner["driver_id"] in set(g.sort_values("p_win", ascending=False)
+                                                            ["driver_id"].head(3))),
             "podium_hit": len(top3 & actual3) / 3,
             "logloss_win": -np.log(pw),
             "brier_win": float(((g["p_win"] - g["win"]) ** 2).sum()),

@@ -51,3 +51,18 @@ def test_baselines_and_models_run():
                          params={"n_estimators": 20} if kind == "lgbm" else {})
         m = metrics(walk_forward(f, spec.as_predictor(), races))
         assert 0 <= m["winner_acc"] <= 1 and np.isfinite(m["logloss_win"])
+
+
+def test_rank_model_probabilities_are_consistent():
+    from f1pred.features import T2_FEATURES_PLUS
+    f = frame()
+    spec = ModelSpec("rank", T2_FEATURES_PLUS, 2.0, {"n_estimators": 30, "min_child_samples": 5})
+    preds = walk_forward(f, spec.as_predictor(), [(2026, r) for r in range(2, 5)])
+    sums = preds.groupby(["season", "round"])
+    assert np.allclose(sums["p_win"].sum(), 1.0)
+    assert np.allclose(sums["p_podium"].sum(), 3.0, atol=0.05)
+    # within a race, a higher win chance never comes with a lower podium chance (same scores)
+    for _, g in sums:
+        g = g.sort_values("p_win")
+        assert (np.diff(g["p_podium"].to_numpy()) >= -0.03).all()
+    assert "winner_top3" in metrics(preds)
