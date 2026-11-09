@@ -1,7 +1,7 @@
-import type { EvalRow, Evaluation, Stage } from '../api'
+import type { EvalRow, Evaluation, Stage } from '@/api'
 import { Load, SectionTitle } from '@/components/core'
-import { useApi } from '../hooks'
-import { pct, STAGE_LABEL } from '../format'
+import { useApi } from '@/hooks'
+import { pct, STAGE_LABEL } from '@/format'
 
 const MODEL_LABEL: Record<string, string> = {
   logreg: 'Logistic regression',
@@ -26,13 +26,13 @@ function Results({ rows, stage }: { rows: EvalRow[]; stage: Stage }) {
         const maxAcc = Math.max(...ws.map((r) => r.winner_acc), 0.01)
         return (
           <div key={w}>
-            <p className="mb-2 font-mono text-[0.7rem] tracking-[0.12em] text-muted uppercase">
+            <p className="label mb-2">
               {w} · {ws[0]?.races} races
             </p>
             <div className="overflow-x-auto">
-              <table className="w-full min-w-[560px] border-collapse text-sm">
+              <table className="w-full min-w-[560px] border-collapse">
                 <thead>
-                  <tr className="border-b border-ink font-mono text-[0.68rem] tracking-[0.12em] text-muted uppercase">
+                  <tr className="label border-b border-night">
                     <th className="py-2 text-left font-medium">Predictor</th>
                     <th className="w-[35%] py-2 text-left font-medium">Winner picked</th>
                     <th className="py-2 text-right font-medium">Podium</th>
@@ -45,13 +45,13 @@ function Results({ rows, stage }: { rows: EvalRow[]; stage: Stage }) {
                   {ws.map((r) => {
                     const base = isBaseline(r.model)
                     return (
-                      <tr key={r.model} className="border-b border-rule">
-                        <td className={`py-2 ${base ? 'text-muted' : 'font-semibold'}`}>{label(r.model)}</td>
+                      <tr key={r.model} className={`border-b border-rule transition-colors duration-[320ms] hover:bg-sun ${base ? '' : 'bg-sun/30'}`}>
+                        <td className={`py-2.5 ${base ? 'text-earth' : 'narrow text-2xl font-extrabold uppercase'}`}>{label(r.model)}</td>
                         <td className="py-2">
                           <div className="flex items-center gap-3">
-                            <div className="h-2.5 w-full rounded-sm bg-stripe">
+                            <div className="h-2 w-full rounded-full bg-paper">
                               <div
-                                className={`bar h-full rounded-sm ${base ? 'bg-muted/50' : 'bg-purple'}`}
+                                className={`bar h-full rounded-full ${base ? 'bg-dash' : 'bg-night'}`}
                                 style={{ width: `${(r.winner_acc / maxAcc) * 100}%` }}
                               />
                             </div>
@@ -60,7 +60,7 @@ function Results({ rows, stage }: { rows: EvalRow[]; stage: Stage }) {
                         </td>
                         <td className="py-2 text-right font-mono tabular">{pct(r.podium_hit, 0)}</td>
                         <td className="py-2 text-right font-mono tabular">
-                          {isDeterministic(r.model) ? <span className="text-muted">{r.logloss_win.toFixed(2)}*</span> : r.logloss_win.toFixed(2)}
+                          {isDeterministic(r.model) ? <span className="text-earth">{r.logloss_win.toFixed(2)}*</span> : r.logloss_win.toFixed(2)}
                         </td>
                       </tr>
                     )
@@ -71,7 +71,7 @@ function Results({ rows, stage }: { rows: EvalRow[]; stage: Stage }) {
           </div>
         )
       })}
-      <p className="font-mono text-[0.7rem] text-muted">
+      <p className="font-mono text-[0.68rem] text-earth">
         * All-or-nothing baselines put 100% on one driver, so their log-loss explodes whenever they miss. The calibrated
         versions (win rate by grid slot or by standings position, learned from earlier races) are the fair comparison.
       </p>
@@ -91,19 +91,19 @@ const STEPS = [
 export default function Model() {
   const ev = useApi<Evaluation>('/evaluation')
   return (
-    <div className="space-y-10">
+    <div className="space-y-16">
       <section>
-        <SectionTitle eyebrow="Method">How the predictions are made</SectionTitle>
-        <dl className="grid gap-x-8 gap-y-5 sm:grid-cols-2">
+        <SectionTitle eyebrow="Method">How the predictions <span className="mark">are made</span></SectionTitle>
+        <dl className="grid gap-x-10 gap-y-9 sm:grid-cols-2 lg:grid-cols-3">
           {STEPS.map(([t, d]) => (
-            <div key={t} className="border-t border-rule pt-3">
-              <dt className="font-display text-lg font-bold uppercase">{t}</dt>
-              <dd className="text-sm text-muted">{d}</dd>
+            <div key={t} className="brackets p-4">
+              <dt className="wide text-base font-extrabold uppercase">{t}</dt>
+              <dd className="mt-1 text-sm text-earth">{d}</dd>
             </div>
           ))}
         </dl>
       </section>
-      <Load value={ev} missing={<p className="text-sm text-muted">Evaluation not published yet.</p>}>
+      <Load value={ev} missing={<p className="text-sm text-earth">Evaluation not published yet.</p>}>
         {(e) => (
           <>
             {(['t2', 't1'] as Stage[]).map((s) => (

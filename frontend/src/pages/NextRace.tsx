@@ -1,144 +1,155 @@
 import { useEffect, useState } from 'react'
 import { Link } from 'react-router-dom'
-import type { BacktestRow, Prediction, Race, Stage } from '../api'
-import { IssueStamp, Load, Notice, SectionTitle, TimingTower } from '@/components/core'
-import { useApi, useNow } from '../hooks'
-import { countdownParts, formatLocal, STAGE_LABEL } from '../format'
+import type { BacktestRow, Prediction, Race, Stage } from '@/api'
+import {
+  Countdown,
+  GuideLine,
+  IssueStamp,
+  Load,
+  Notice,
+  ProbabilityDial,
+  SectionTitle,
+  StageToggle,
+} from '@/components/core'
+import { PredictionTable } from '@/components/PredictionTable'
+import { useApi, type Loadable } from '@/hooks'
+import { formatLocal, pct, STAGE_LABEL } from '@/format'
 
-function Countdown({ iso }: { iso?: string }) {
-  const now = useNow()
-  if (!iso) return null
-  const ms = new Date(iso).getTime() - now
-  if (ms <= 0) return <p className="font-mono text-sm text-muted">Race under way or finished.</p>
-  const c = countdownParts(ms)
-  const cells: [number, string][] = [
-    [c.days, 'days'],
-    [c.hours, 'hrs'],
-    [c.minutes, 'min'],
-    [c.seconds, 'sec'],
-  ]
+function preferredStage(stages: Stage[]): Stage | null {
+  return stages.includes('t2') ? 't2' : (stages[0] ?? null)
+}
+
+function ReplayStats() {
+  const bt = useApi<{ t2?: BacktestRow[] }>('/backtest/2026')
+  const rows = bt.state === 'ready' ? (bt.data.t2 ?? []) : []
+  const stats: [string, string][] = rows.length
+    ? [
+        [String(rows.length), 'races of 2026 replayed'],
+        [String(rows.filter((r) => r.pole_won).length), 'won from pole'],
+        [String(rows.filter((r) => r.predicted === r.actual).length), 'called by the model'],
+      ]
+    : []
   return (
-    <div className="flex gap-4" aria-label="Time until lights out">
-      {cells.map(([v, l]) => (
-        <div key={l} className="text-center">
-          <div className="font-display text-4xl font-bold tabular">{String(v).padStart(2, '0')}</div>
-          <div className="font-mono text-[0.65rem] tracking-[0.14em] text-muted uppercase">{l}</div>
+    <dl className="grid grid-cols-3 gap-4 md:block md:space-y-4">
+      {stats.map(([v, l]) => (
+        <div key={l}>
+          <dt className="sr-only">{l}</dt>
+          <dd>
+            <span className="narrow block text-4xl leading-none font-extrabold tabular">{v}</span>
+            <span className="label">{l}</span>
+          </dd>
         </div>
       ))}
-    </div>
+      {rows.length > 0 && (
+        <Link to="/track-record" className="label col-span-3 inline-block underline underline-offset-4 hover:text-night">
+          See every race →
+        </Link>
+      )}
+    </dl>
   )
 }
 
-function PredictionPanel({ race }: { race: Race }) {
-  const stages = race.prediction_stages
-  const [stage, setStage] = useState<Stage | null>(stages.includes('t2') ? 't2' : stages[0] ?? null)
-  useEffect(() => {
-    setStage(stages.includes('t2') ? 't2' : stages[0] ?? null)
-  }, [race.round, stages])
-  const pred = useApi<Prediction>(stage ? `/races/${race.season}/${race.round}/predictions?stage=${stage}` : null)
-
-  if (!stage) {
-    return (
-      <Notice>
-        <p className="mb-2 font-semibold text-ink">No prediction published for this race yet.</p>
-        <p>
-          The first one (before qualifying) is issued after final practice, ahead of qualifying on{' '}
-          <strong className="text-ink">{formatLocal(race.quali_utc)}</strong>. The second one adds the starting grid and
-          is issued before lights out.
-        </p>
-      </Notice>
-    )
-  }
-
+function Hero({ race, prediction, stage }: { race: Race; prediction: Loadable<Prediction>; stage: Stage | null }) {
+  const name = race.race_name.replace(' Grand Prix', '')
+  const top = prediction.state === 'ready' ? prediction.data.predictions[0] : null
   return (
-    <div className="rounded-lg border border-rule bg-sheet p-4 sm:p-6">
-      <div className="mb-5 flex flex-wrap items-start justify-between gap-4">
-        <div role="tablist" aria-label="Prediction stage" className="flex gap-1">
-          {(['t1', 't2'] as Stage[]).map((s) => (
-            <button
-              key={s}
-              role="tab"
-              aria-selected={stage === s}
-              disabled={!stages.includes(s)}
-              onClick={() => setStage(s)}
-              className={`rounded px-3 py-1.5 font-mono text-[0.72rem] tracking-[0.08em] uppercase disabled:cursor-not-allowed disabled:opacity-40 ${
-                stage === s ? 'bg-ink text-sheet' : 'border border-rule text-muted hover:text-ink'
-              }`}
-            >
-              {STAGE_LABEL[s]}
-            </button>
-          ))}
-        </div>
-        {pred.state === 'ready' && <IssueStamp prediction={pred.data} />}
+    <section className="text-center">
+      <p className="label">
+        Round {race.round} · {race.locality}, {race.country}
+      </p>
+      <h1 className="wide mt-3 text-[clamp(2.6rem,9vw,6.5rem)] leading-[0.92] font-extrabold tracking-tight uppercase">
+        {name}
+        <span className="block">
+          <span className="mark">Grand Prix</span>
+        </span>
+      </h1>
+
+      <div className="mx-auto mt-6 flex max-w-4xl items-center gap-4">
+        <GuideLine className="flex-1" />
+        <span className="label whitespace-nowrap">Lights out {formatLocal(race.race_start_utc)}</span>
+        <GuideLine className="flex-1" />
       </div>
-      <Load value={pred}>
-        {(p) => (
-          <>
-            <TimingTower prediction={p} />
-            <p className="mt-4 font-mono text-[0.7rem] text-muted">
-              Model: {p.model.kind} · trained on {p.train_races} races up to {p.train_until}. Win probabilities add up
-              to 100% per race; podium probabilities add up to 300%.
-            </p>
-            {p.warnings.map((w) => (
-              <p key={w} className="mt-1 font-mono text-[0.7rem] text-amber">
-                Note: {w}
-              </p>
-            ))}
-          </>
-        )}
-      </Load>
-    </div>
-  )
-}
 
-function BacktestTeaser() {
-  const bt = useApi<{ t2?: BacktestRow[] }>('/backtest/2026')
-  if (bt.state !== 'ready' || !bt.data.t2?.length) return null
-  const rows = bt.data.t2
-  const model = rows.filter((r) => r.predicted === r.actual).length
-  const pole = rows.filter((r) => r.pole_won).length
-  return (
-    <p className="text-sm text-muted">
-      Replayed over the {rows.length} races of 2026 so far (each one predicted only from earlier races), the model picked
-      the winner <strong className="text-ink">{model} times</strong>; simply backing the pole-sitter would have been right{' '}
-      <strong className="text-ink">{pole} times</strong>.{' '}
-      <Link to="/track-record" className="text-purple underline underline-offset-2">
-        See every race
-      </Link>
-      .
-    </p>
+      <a
+        href="#prediction"
+        className="brackets mt-7 inline-block px-5 py-2.5 font-mono text-[0.72rem] tracking-[0.12em] uppercase"
+      >
+        {top ? 'See the full prediction' : 'How the prediction works'}
+      </a>
+
+      <div className="mt-12 grid items-center gap-10 text-left md:grid-cols-[1fr_320px_1fr]">
+        <ReplayStats />
+        <div className="order-first md:order-none">
+        <ProbabilityDial
+          probability={top ? top.p_win : null}
+          title={top ? (top.code ?? top.driver_id) : 'TBA'}
+          subtitle={top ? (top.name ?? top.driver_id) : 'After final practice'}
+          detail={top ? `${pct(top.p_win)} to win` : undefined}
+          caption={stage ? STAGE_LABEL[stage] : 'Not issued'}
+        />
+        </div>
+        <div className="md:justify-self-end md:text-right">
+          <Countdown iso={race.race_start_utc} />
+        </div>
+      </div>
+    </section>
   )
 }
 
 export default function NextRace() {
   const race = useApi<Race>('/races/next')
+  const stages = race.state === 'ready' ? race.data.prediction_stages : []
+  const [stage, setStage] = useState<Stage | null>(null)
+  useEffect(() => setStage(preferredStage(stages)), [stages.join(',')]) // eslint-disable-line react-hooks/exhaustive-deps
+  const path =
+    race.state === 'ready' && stage ? `/races/${race.data.season}/${race.data.round}/predictions?stage=${stage}` : null
+  const prediction = useApi<Prediction>(path)
+
   return (
     <Load
       value={race}
-      missing={<Notice>The 2026 season is over — see the track record for how the predictions did.</Notice>}
+      missing={<Notice>The 2026 season is over. See the track record for how the predictions did.</Notice>}
     >
       {(r) => (
-        <div className="space-y-8">
-          <section className="flex flex-wrap items-end justify-between gap-6">
-            <div>
-              <p className="font-mono text-[0.72rem] tracking-[0.14em] text-muted uppercase">
-                Round {r.round} · {r.locality}, {r.country}
-              </p>
-              <h1 className="font-display text-6xl leading-[0.9] font-extrabold tracking-tight uppercase sm:text-7xl">
-                {r.race_name.replace(' Grand Prix', '')}
-                <span className="block text-2xl font-semibold tracking-normal text-muted sm:text-3xl">Grand Prix</span>
-              </h1>
-              <p className="mt-3 font-mono text-sm text-muted">Lights out {formatLocal(r.race_start_utc)} (your time)</p>
-            </div>
-            <Countdown iso={r.race_start_utc} />
-          </section>
+        <div className="space-y-16">
+          <Hero race={r} prediction={path ? prediction : { state: 'missing' }} stage={stage} />
 
-          <section>
-            <SectionTitle eyebrow="Who wins?">Prediction</SectionTitle>
-            <PredictionPanel race={r} />
+          <section id="prediction" className="scroll-mt-24">
+            <SectionTitle eyebrow="Who wins?">The prediction</SectionTitle>
+            {!stage ? (
+              <Notice>
+                <p className="mb-2 font-semibold text-night">No prediction published for this race yet.</p>
+                <p>
+                  The first one (before qualifying) is issued after final practice, ahead of qualifying on{' '}
+                  <strong className="text-night">{formatLocal(r.quali_utc)}</strong>. The second adds the starting grid
+                  and is issued before lights out. Both are committed to the public repository before the race.
+                </p>
+              </Notice>
+            ) : (
+              <div className="rounded-xl border border-rule bg-paper/60 p-4 sm:p-6">
+                <div className="mb-6 flex flex-wrap items-start justify-between gap-4">
+                  <StageToggle stage={stage} available={stages} onChange={setStage} />
+                  {prediction.state === 'ready' && <IssueStamp prediction={prediction.data} />}
+                </div>
+                <Load value={prediction}>
+                  {(p) => (
+                    <>
+                      <PredictionTable prediction={p} />
+                      <p className="mt-4 font-mono text-[0.68rem] text-earth">
+                        Model: {p.model.kind} · trained on {p.train_races} races up to {p.train_until}. Win
+                        probabilities add up to 100% per race; podium probabilities to 300%.
+                      </p>
+                      {p.warnings.map((w) => (
+                        <p key={w} className="mt-1 font-mono text-[0.68rem] text-earth">
+                          Note: {w}
+                        </p>
+                      ))}
+                    </>
+                  )}
+                </Load>
+              </div>
+            )}
           </section>
-
-          <BacktestTeaser />
         </div>
       )}
     </Load>
