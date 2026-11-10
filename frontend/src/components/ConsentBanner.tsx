@@ -32,7 +32,7 @@ export function ConsentBanner() {
     >
       <div className="flex flex-wrap items-center gap-x-3 gap-y-2">
         <p className="min-w-0 flex-1 text-[12.5px] leading-snug text-earth">
-          Allow Microsoft Clarity cookies to help improve this site?{' '}
+          Allow analytics cookies to help improve this site?{' '}
           <button
             type="button"
             aria-expanded={more}
