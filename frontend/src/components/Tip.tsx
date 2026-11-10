@@ -1,4 +1,5 @@
 import { useEffect, useId, useRef, useState, type ReactNode } from 'react'
+import { track } from '@/analytics'
 
 /**
  * Plain-language explanation next to a label. Opens on hover, keyboard focus or tap, closes on
@@ -36,6 +37,7 @@ export function Tip({ text, children, align = 'left' }: { text: string; children
         onClick={(e) => {
           e.stopPropagation()
           setOpen((v) => !v)
+          track('explanation-open', { text: text.slice(0, 50) })
         }}
         onFocus={() => setOpen(true)}
         onBlur={() => setOpen(false)}

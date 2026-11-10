@@ -1,4 +1,5 @@
-import { useMemo, useState } from 'react'
+import { useEffect, useMemo, useState } from 'react'
+import { track } from '@/analytics'
 import { Link, useParams } from 'react-router-dom'
 import { ArrowLeft, ArrowRight } from 'lucide'
 import type { DriverDetail, Prediction, Race, RaceDetail as Detail, Reason, Stage } from '@/api'
@@ -99,7 +100,10 @@ function SlopeChart({ drivers, stage }: { drivers: DriverDetail[]; stage: Stage 
   const bind = (id: string) => ({
     onMouseEnter: () => setHover(id),
     onMouseLeave: () => setHover(null),
-    onClick: () => setPinned((p) => (p === id ? null : id)),
+    onClick: () => {
+      setPinned((p) => (p === id ? null : id))
+      track('chart-driver-pin', { driver: id })
+    },
     style: { cursor: 'pointer' },
   })
 
@@ -112,7 +116,10 @@ function SlopeChart({ drivers, stage }: { drivers: DriverDetail[]; stage: Stage 
               key={k}
               role="tab"
               aria-selected={left === k}
-              onClick={() => setLeft(k)}
+              onClick={() => {
+                setLeft(k)
+                track('chart-left-mode', { mode: k })
+              }}
               className={`rounded-full px-3.5 py-1.5 font-mono text-[0.7rem] tracking-[0.08em] uppercase transition-colors duration-[320ms] ${
                 left === k ? 'bg-night text-stone' : 'hover:bg-paper'
               }`}
@@ -372,6 +379,7 @@ export default function RaceDetailPage() {
   const detail = useApi<Detail>(`/races/${season}/${round}/detail`)
   const races = useApi<Race[]>(`/races?season=${season}`)
   const [stage, setStage] = useState<Stage>('t2')
+  useEffect(() => track('race-open', { race: `${season}-${round}` }), [season, round])
   const winner = useMemo(() => (detail.state === 'ready' ? detail.data.drivers.find((d) => d.finish === 1) : undefined), [detail])
 
   return (

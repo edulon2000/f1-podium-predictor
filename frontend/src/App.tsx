@@ -7,6 +7,9 @@ import TrackRecord from './pages/TrackRecord'
 import Season from './pages/Season'
 import Model from './pages/Model'
 import RaceDetail from './pages/RaceDetail'
+import Privacy from './pages/Privacy'
+import { ConsentBanner } from '@/components/ConsentBanner'
+import { clarityConfigured, resetConsent, track } from '@/analytics'
 
 const NAV = [
   { to: '/', label: 'Next race' },
@@ -84,17 +87,33 @@ export default function App() {
           <Route path="/season" element={<Season />} />
           <Route path="/model" element={<Model />} />
           <Route path="/race/:season/:round" element={<RaceDetail />} />
+          <Route path="/privacy" element={<Privacy />} />
           <Route path="*" element={<p className="text-earth">Page not found.</p>} />
         </Routes>
       </main>
 
+      <ConsentBanner />
       <footer className="relative mt-10 border-t border-rule">
         <div aria-hidden className="dots absolute inset-x-0 bottom-full h-16" />
         <div className="mx-auto flex max-w-6xl flex-wrap justify-between gap-2 px-4 py-5 font-mono text-[0.68rem] text-earth">
           <span>Data: Jolpica-F1 (results since 2014) · OpenF1 (sessions since 2023)</span>
-          <a className="underline underline-offset-2 hover:text-night" href="https://github.com/edulon2000/f1-podium-predictor">
-            Source on GitHub
-          </a>
+          <span className="flex flex-wrap gap-3">
+            <a
+              className="underline underline-offset-2 hover:text-night"
+              href="https://github.com/edulon2000/f1-podium-predictor"
+              onClick={() => track('github-click')}
+            >
+              Source on GitHub
+            </a>
+            <NavLink to="/privacy" className="underline underline-offset-2 hover:text-night">
+              Privacy
+            </NavLink>
+            {clarityConfigured() && (
+              <button onClick={resetConsent} className="underline underline-offset-2 hover:text-night">
+                Cookie settings
+              </button>
+            )}
+          </span>
           <span>Unofficial project, not associated with Formula 1.</span>
         </div>
       </footer>

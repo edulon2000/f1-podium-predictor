@@ -5,6 +5,7 @@ import type { Loadable } from '@/hooks'
 import { useNow } from '@/hooks'
 import { countdownParts, formatUtc, STAGE_LABEL } from '@/format'
 import { Morph } from './Morph'
+import { track } from '@/analytics'
 
 export function SectionTitle({ eyebrow, children }: { eyebrow?: string; children: ReactNode }) {
   return (
@@ -89,7 +90,10 @@ export function StageToggle({
             role="tab"
             aria-selected={active}
             disabled={!available.includes(s)}
-            onClick={() => onChange(s)}
+            onClick={() => {
+              onChange(s)
+              track('stage-toggle', { stage: s })
+            }}
             className={`flex items-center gap-2 rounded-full px-3.5 py-1.5 font-mono text-[0.7rem] tracking-[0.08em] uppercase transition-colors duration-[320ms] ease-[cubic-bezier(.22,1,.36,1)] disabled:cursor-not-allowed disabled:opacity-35 ${
               active ? 'bg-night text-stone' : 'text-night hover:bg-paper'
             }`}
