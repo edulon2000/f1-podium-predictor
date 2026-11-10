@@ -7,6 +7,8 @@ WORKDIR /web
 COPY frontend/package.json frontend/package-lock.json ./
 RUN npm ci
 COPY frontend/ ./
+# The build copies ../site_data into dist/data (the front reads the JSON directly).
+COPY site_data /site_data
 RUN npm run build
 
 FROM python:3.12-slim

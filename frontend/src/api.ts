@@ -1,4 +1,4 @@
-// Types mirror the FastAPI response models (src/f1pred/api/app.py).
+// Types mirror the exported JSON (src/f1pred/export.py) and the FastAPI models (src/f1pred/api/app.py).
 
 export type Stage = 't1' | 't2'
 
@@ -164,9 +164,42 @@ export interface RaceDetail {
 
 export class NotFound extends Error {}
 
-export async function get<T>(path: string): Promise<T> {
-  const res = await fetch(`/api${path}`)
-  if (res.status === 404) throw new NotFound(path)
-  if (!res.ok) throw new Error(`${res.status} on ${path}`)
+/**
+ * The site is static: the exported JSON (site_data/) is published under /data next to the
+ * front. These routes keep the old API paths so pages did not have to change.
+ */
+const pad2 = (n: string) => n.padStart(2, '0')
+const ROUTES: [RegExp, (m: RegExpMatchArray) => string][] = [
+  [/^\/races\?season=(\d+)$/, (m) => `races_${m[1]}.json`],
+  [/^\/races\/(\d+)\/(\d+)\/predictions\?stage=(t[12])$/, (m) => `predictions/${m[1]}_R${pad2(m[2])}_${m[3]}.json`],
+  [/^\/races\/(\d+)\/(\d+)\/detail$/, (m) => `races/${m[1]}_R${pad2(m[2])}.json`],
+  [/^\/backtest\/(\d+)$/, (m) => `backtest_${m[1]}.json`],
+  [/^\/(scoreboard|evaluation|drivers|meta)$/, (m) => `${m[1]}.json`],
+]
+
+export function dataFile(path: string): string {
+  for (const [re, file] of ROUTES) {
+    const m = path.match(re)
+    if (m) return `/data/${file(m)}`
+  }
+  throw new NotFound(path)
+}
+
+async function getFile<T>(path: string): Promise<T> {
+  const url = dataFile(path)
+  const res = await fetch(url, { cache: 'no-cache' })
+  // A static host answers a missing file with the SPA's index.html (200, text/html): treat as 404.
+  const isJson = (res.headers.get('content-type') ?? '').includes('json')
+  if (res.status === 404 || (res.ok && !isJson)) throw new NotFound(path)
+  if (!res.ok) throw new Error(`${res.status} on ${url}`)
   return res.json() as Promise<T>
+}
+
+export async function get<T>(path: string): Promise<T> {
+  if (path === '/races/next') {
+    const next = (await getFile<Race[]>('/races?season=2026')).find((r) => r.status === 'upcoming')
+    if (!next) throw new NotFound(path)
+    return next as T
+  }
+  return getFile<T>(path)
 }

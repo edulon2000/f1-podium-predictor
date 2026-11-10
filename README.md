@@ -12,7 +12,7 @@ where "same era" = 2022+). It helped after qualifying (×3) and not before it (�
 - **Phase 1 — data** ✅ Jolpica 2014–2026 + OpenF1 2023–2026 in Parquet, with a data map.
 - **Phase 2 — features + model** ✅ leakage-tested features, walk-forward evaluation against two
   baselines, prediction CLI. Full results: [reports/EVALUATION.md](reports/EVALUATION.md).
-- **Phase 3 — showcase** ✅ FastAPI + React site, Docker image, Render blueprint, CI.
+- **Phase 3 — showcase** ✅ React site (static on Render) + FastAPI/Docker, CI.
 - **Live record** — predictions are committed to `predictions/` before each race.
 
 ## Results so far (test races 2025–26, 44 races, walk-forward)
@@ -61,22 +61,24 @@ uv run f1pred-score --season 2026 --round 21
 Commit `predictions/` after steps 2 and 3, before the race starts, then publish the site data:
 
 ```bash
-uv run f1pred-export            # writes site_data/ (committed; the deployed API only reads it)
+uv run f1pred-export            # writes site_data/ (committed; the static site serves it as /data)
 git add predictions site_data && git commit -m "prediction: <race> <stage>" && git push
 ```
 
-## Website (FastAPI + React)
+## Website (static React site + optional FastAPI)
+
+The deployed site is **static**: the React build plus the JSON exported to `site_data/`, copied
+to `/data` at build time. No server, so it never sleeps; every push to `main` redeploys it.
 
 ```bash
-cd frontend && npm ci && npm run build && cd ..   # build the front once
-uv run uvicorn f1pred.api.app:app --port 8000     # API + site on http://localhost:8000
+cd frontend && npm ci
+npm run dev        # http://localhost:5173, serves ../site_data at /data
+npm run build      # dist/ with dist/data/ — what Render publishes (render.yaml, static site)
 ```
 
-- API docs (Swagger): http://localhost:8000/docs
-- Front-end development with hot reload: `uv run uvicorn f1pred.api.app:app --port 8000` and,
-  in another terminal, `cd frontend && npm run dev` (http://localhost:5173, proxies `/api`).
-- Deploy: `Dockerfile` + `render.yaml` (Render, free plan). The image contains only FastAPI,
-  `site_data/` and the built front — no pandas, no model.
+- The same JSON is also available as a REST API (FastAPI, Swagger at `/docs`):
+  `cd frontend && npm run build && cd .. && uv run uvicorn f1pred.api.app:app --port 8000`.
+- `Dockerfile` packages that API + site (FastAPI only, no pandas, no model) for any container host.
 
 ## Pipeline
 
